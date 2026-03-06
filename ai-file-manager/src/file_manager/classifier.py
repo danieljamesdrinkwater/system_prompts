@@ -1,4 +1,4 @@
-"""File classification using Ollama LLM and extension-based fast path."""
+"""File classification using OpenRouter (Gemini Flash) and extension-based fast path."""
 
 import json
 import logging
@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-import ollama
+from openai import OpenAI
 
 from .config import build_extension_map, get_valid_categories
 from .utils import extract_text_content, human_readable_size, sanitize_filename
@@ -125,18 +125,22 @@ class ClassificationResult:
 
 
 class FileClassifier:
-    """Classifies files using extension fast-path and Ollama AI."""
+    """Classifies files using extension fast-path and OpenRouter AI."""
 
     def __init__(self, config: dict[str, Any]):
         self.config = config
-        self.ollama_config = config["ollama"]
+        self.ai_config = config["openrouter"]
         self.extension_map = build_extension_map(config)
         self.valid_categories = get_valid_categories(config)
+        self.client = OpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=self.ai_config["api_key"],
+        )
 
     def classify(self, filepath: Path) -> ClassificationResult:
         """Classify a file into the folder hierarchy.
 
-        Tries extension-based fast path first, falls back to Ollama AI.
+        Tries extension-based fast path first, falls back to OpenRouter AI.
         """
         ext = filepath.suffix.lower()
 
@@ -154,27 +158,28 @@ class FileClassifier:
         try:
             return self._classify_with_ai(filepath)
         except Exception as e:
-            logger.warning("Ollama classification failed for %s: %s", filepath.name, e)
+            logger.warning("OpenRouter classification failed for %s: %s", filepath.name, e)
             return self._fallback_classification(filepath)
 
     def _classify_with_ai(self, filepath: Path) -> ClassificationResult:
-        """Use Ollama to classify the file."""
+        """Use OpenRouter (Gemini Flash) to classify the file."""
         prompt = self._build_user_prompt(filepath)
 
-        response = ollama.chat(
-            model=self.ollama_config["model"],
+        response = self.client.chat.completions.create(
+            model=self.ai_config["model"],
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": prompt},
             ],
-            options={"num_predict": 1024},
+            max_tokens=256,
+            temperature=0.1,
         )
 
-        content = response["message"]["content"]
+        content = response.choices[0].message.content or ""
         parsed = self._parse_json_response(content)
 
         if parsed is None:
-            logger.warning("Failed to parse Ollama response for %s: %s", filepath.name, content[:200])
+            logger.warning("Failed to parse OpenRouter response for %s: %s", filepath.name, content[:200])
             return self._fallback_classification(filepath)
 
         # Validate the category
@@ -200,7 +205,7 @@ class FileClassifier:
         )
 
     def _build_user_prompt(self, filepath: Path) -> str:
-        """Build the user prompt for Ollama."""
+        """Build the user prompt for the AI model."""
         size = filepath.stat().st_size
         parts = [
             f"Categorize this file:",
@@ -209,10 +214,10 @@ class FileClassifier:
             f"Size: {human_readable_size(size)}",
         ]
 
-        if self.ollama_config.get("analyze_content", True):
+        if self.ai_config.get("analyze_content", True):
             content = extract_text_content(
                 filepath,
-                max_chars=self.ollama_config.get("max_content_chars", 2000),
+                max_chars=self.ai_config.get("max_content_chars", 2000),
             )
             if content:
                 parts.append(f"\nContent preview (first {len(content)} chars):\n{content}")
@@ -221,8 +226,8 @@ class FileClassifier:
         return "\n".join(parts)
 
     def _parse_json_response(self, content: str) -> dict | None:
-        """Parse JSON from Ollama response with multiple fallback strategies."""
-        # Strip <think>...</think> blocks from reasoning models (e.g. deepseek-r1)
+        """Parse JSON from AI response with multiple fallback strategies."""
+        # Strip <think>...</think> blocks from reasoning models
         content = re.sub(r'<think>.*?</think>', '', content, flags=re.DOTALL).strip()
 
         # Strategy 1: Direct parse

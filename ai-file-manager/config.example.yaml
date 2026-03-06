@@ -2,9 +2,9 @@
 
 drop_zone: "~/Desktop/File Manager"
 
-ollama:
-  model: "deepseek-r1:1.5b"
-  host: "http://localhost:11434"
+openrouter:
+  api_key: "YOUR_OPENROUTER_API_KEY_HERE"
+  model: "google/gemini-2.0-flash-001"
   timeout: 30
   analyze_content: true
   max_content_chars: 2000

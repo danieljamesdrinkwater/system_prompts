@@ -14,13 +14,13 @@ def test_load_defaults():
     assert "drop_zone" in config
     assert "hierarchy" in config
     assert "Documents" in config["hierarchy"]
-    assert config["ollama"]["model"] == "deepseek-r1:1.5b"
+    assert config["openrouter"]["model"] == "google/gemini-2.0-flash-001"
 
 
 def test_load_config_file():
     """User config overrides defaults."""
     user_config = {
-        "ollama": {"model": "mistral"},
+        "openrouter": {"model": "google/gemini-2.5-flash"},
         "stabilization_delay": 5.0,
     }
     with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
@@ -28,10 +28,10 @@ def test_load_config_file():
         f.flush()
         config = load_config(f.name)
 
-    assert config["ollama"]["model"] == "mistral"
+    assert config["openrouter"]["model"] == "google/gemini-2.5-flash"
     assert config["stabilization_delay"] == 5.0
     # Defaults should still be present for non-overridden keys
-    assert config["ollama"]["timeout"] == 30
+    assert config["openrouter"]["timeout"] == 30
     assert "Documents" in config["hierarchy"]
 
 

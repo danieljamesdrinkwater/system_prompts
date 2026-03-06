@@ -7,9 +7,9 @@ import yaml
 
 DEFAULT_CONFIG = {
     "drop_zone": "~/Desktop/File Manager",
-    "ollama": {
-        "model": "deepseek-r1:1.5b",
-        "host": "http://localhost:11434",
+    "openrouter": {
+        "api_key": "",
+        "model": "google/gemini-2.0-flash-001",
         "timeout": 30,
         "analyze_content": True,
         "max_content_chars": 2000,

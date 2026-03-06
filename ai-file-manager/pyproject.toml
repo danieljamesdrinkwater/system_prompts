@@ -1,11 +1,11 @@
 [project]
 name = "ai-file-manager"
 version = "0.1.0"
-description = "AI-powered local file organizer using Ollama"
+description = "AI-powered local file organizer using OpenRouter"
 requires-python = ">=3.10"
 dependencies = [
     "watchdog>=4.0.0",
-    "ollama>=0.3.0",
+    "openai>=1.0.0",
     "pyyaml>=6.0",
 ]
 

@@ -8,7 +8,7 @@ import time
 from pathlib import Path
 from typing import Any
 
-import ollama as ollama_client
+from openai import OpenAI
 
 from .classifier import FileClassifier
 from .config import load_config
@@ -37,7 +37,7 @@ class FileManagerDaemon:
         setup_logging(self.config, foreground=foreground)
 
         # Preflight checks
-        self._check_ollama()
+        self._check_openrouter()
         self._check_pid_file()
 
         # Create folder hierarchy
@@ -121,24 +121,27 @@ class FileManagerDaemon:
         watcher.handler._queue.join()
         print("Done organizing existing files.")
 
-    def _check_ollama(self) -> None:
-        """Verify Ollama is reachable and the model is available."""
+    def _check_openrouter(self) -> None:
+        """Verify OpenRouter API key is configured and reachable."""
+        ai_config = self.config["openrouter"]
+        api_key = ai_config.get("api_key", "")
+        if not api_key:
+            print("Error: OpenRouter API key not configured.")
+            print("Set it in config.yaml under openrouter.api_key")
+            sys.exit(1)
+
         try:
-            models = ollama_client.list()
-            model_names = [m.model for m in models.models]
-            target = self.config["ollama"]["model"]
-            # Check if target model (or a variant) is available
-            found = any(target in name for name in model_names)
-            if not found:
-                print(f"Warning: Model '{target}' not found in Ollama.")
-                print(f"Available models: {', '.join(model_names) or '(none)'}")
-                print(f"Run: ollama pull {target}")
-                sys.exit(1)
-            logger.info("Ollama OK, model '%s' available.", target)
+            client = OpenAI(
+                base_url="https://openrouter.ai/api/v1",
+                api_key=api_key,
+            )
+            # Quick validation: list models to confirm the key works
+            client.models.list()
+            logger.info("OpenRouter OK, using model '%s'.", ai_config["model"])
         except Exception as e:
-            print(f"Error: Cannot connect to Ollama at {self.config['ollama']['host']}")
+            print(f"Error: Cannot connect to OpenRouter.")
             print(f"Details: {e}")
-            print("Make sure Ollama is running: ollama serve")
+            print("Check your API key in config.yaml")
             sys.exit(1)
 
     def _check_pid_file(self) -> None:

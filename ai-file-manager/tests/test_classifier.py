@@ -9,6 +9,13 @@ from file_manager.classifier import ClassificationResult, FileClassifier
 from file_manager.config import load_config
 
 
+def _make_config() -> dict:
+    """Load config with a dummy API key for testing."""
+    config = load_config(None)
+    config["openrouter"]["api_key"] = "sk-or-test-fake-key"
+    return config
+
+
 def _make_temp_file(name: str, content: str = "test") -> Path:
     """Create a temporary file with the given name."""
     tmp_dir = Path(tempfile.mkdtemp())
@@ -19,7 +26,7 @@ def _make_temp_file(name: str, content: str = "test") -> Path:
 
 def test_fast_path_mp3():
     """MP3 files should be classified via fast path without AI."""
-    config = load_config(None)
+    config = _make_config()
     classifier = FileClassifier(config)
     filepath = _make_temp_file("song.mp3")
 
@@ -31,7 +38,7 @@ def test_fast_path_mp3():
 
 def test_fast_path_zip():
     """ZIP files should be classified as Downloads/Archives."""
-    config = load_config(None)
+    config = _make_config()
     classifier = FileClassifier(config)
     filepath = _make_temp_file("backup.zip")
 
@@ -42,7 +49,7 @@ def test_fast_path_zip():
 
 def test_fast_path_exe():
     """EXE files should be classified as Downloads/Installers."""
-    config = load_config(None)
+    config = _make_config()
     classifier = FileClassifier(config)
     filepath = _make_temp_file("setup.exe")
 
@@ -52,7 +59,7 @@ def test_fast_path_exe():
 
 def test_parse_json_clean():
     """Classifier can parse clean JSON responses."""
-    config = load_config(None)
+    config = _make_config()
     classifier = FileClassifier(config)
 
     response = json.dumps({
@@ -67,7 +74,7 @@ def test_parse_json_clean():
 
 def test_parse_json_markdown_block():
     """Classifier can extract JSON from markdown code blocks."""
-    config = load_config(None)
+    config = _make_config()
     classifier = FileClassifier(config)
 
     response = '```json\n{"category": "Images/Photos", "suggested_name": "sunset.jpg", "confidence": "high", "reasoning": "photo"}\n```'
@@ -77,7 +84,7 @@ def test_parse_json_markdown_block():
 
 def test_parse_json_with_text():
     """Classifier can find JSON embedded in surrounding text."""
-    config = load_config(None)
+    config = _make_config()
     classifier = FileClassifier(config)
 
     response = 'Here is the classification:\n{"category": "Code/Scripts", "suggested_name": "deploy.sh", "confidence": "medium", "reasoning": "shell script"}\nDone.'
@@ -86,8 +93,8 @@ def test_parse_json_with_text():
 
 
 def test_parse_json_with_think_tags():
-    """Classifier strips <think> blocks from reasoning models like deepseek-r1."""
-    config = load_config(None)
+    """Classifier strips <think> blocks from reasoning models."""
+    config = _make_config()
     classifier = FileClassifier(config)
 
     response = '<think>\nLet me analyze this file. It has a .pdf extension and the name suggests it is a financial document.\n</think>\n{"category": "Documents/Finance/Invoices", "suggested_name": "invoice-march.pdf", "confidence": "high", "reasoning": "invoice document"}'
@@ -98,7 +105,7 @@ def test_parse_json_with_think_tags():
 
 def test_parse_json_invalid():
     """Invalid JSON returns None."""
-    config = load_config(None)
+    config = _make_config()
     classifier = FileClassifier(config)
 
     result = classifier._parse_json_response("not json at all")
@@ -107,7 +114,7 @@ def test_parse_json_invalid():
 
 def test_fallback_classification():
     """Fallback uses extension map when AI fails."""
-    config = load_config(None)
+    config = _make_config()
     classifier = FileClassifier(config)
     filepath = _make_temp_file("report.pdf")
 
@@ -118,7 +125,7 @@ def test_fallback_classification():
 
 def test_fallback_unknown_extension():
     """Unknown extensions fall back to Miscellaneous."""
-    config = load_config(None)
+    config = _make_config()
     classifier = FileClassifier(config)
     filepath = _make_temp_file("mystery.xyz123")
 
@@ -126,22 +133,24 @@ def test_fallback_unknown_extension():
     assert result.category == "Miscellaneous"
 
 
-@patch("file_manager.classifier.ollama")
-def test_ai_classification(mock_ollama):
-    """AI classification calls Ollama and parses the response."""
-    config = load_config(None)
+def test_ai_classification():
+    """AI classification calls OpenRouter and parses the response."""
+    config = _make_config()
     classifier = FileClassifier(config)
 
-    mock_ollama.chat.return_value = {
-        "message": {
-            "content": json.dumps({
-                "category": "Documents/Finance/Invoices",
-                "suggested_name": "2024-03-electricity-bill.pdf",
-                "confidence": "high",
-                "reasoning": "Electricity bill invoice",
-            })
-        }
-    }
+    # Mock the OpenAI client's chat completions
+    mock_message = MagicMock()
+    mock_message.content = json.dumps({
+        "category": "Documents/Finance/Invoices",
+        "suggested_name": "2024-03-electricity-bill.pdf",
+        "confidence": "high",
+        "reasoning": "Electricity bill invoice",
+    })
+    mock_choice = MagicMock()
+    mock_choice.message = mock_message
+    mock_response = MagicMock()
+    mock_response.choices = [mock_choice]
+    classifier.client.chat.completions.create = MagicMock(return_value=mock_response)
 
     filepath = _make_temp_file("report.pdf", content="Electricity bill for March 2024")
     result = classifier._classify_with_ai(filepath)
@@ -149,22 +158,23 @@ def test_ai_classification(mock_ollama):
     assert "electricity" in result.suggested_name
 
 
-@patch("file_manager.classifier.ollama")
-def test_ai_invalid_category_falls_back(mock_ollama):
+def test_ai_invalid_category_falls_back():
     """AI returning an invalid category falls back to top-level or Miscellaneous."""
-    config = load_config(None)
+    config = _make_config()
     classifier = FileClassifier(config)
 
-    mock_ollama.chat.return_value = {
-        "message": {
-            "content": json.dumps({
-                "category": "Documents/Cooking",
-                "suggested_name": "recipe.pdf",
-                "confidence": "high",
-                "reasoning": "A recipe",
-            })
-        }
-    }
+    mock_message = MagicMock()
+    mock_message.content = json.dumps({
+        "category": "Documents/Cooking",
+        "suggested_name": "recipe.pdf",
+        "confidence": "high",
+        "reasoning": "A recipe",
+    })
+    mock_choice = MagicMock()
+    mock_choice.message = mock_message
+    mock_response = MagicMock()
+    mock_response.choices = [mock_choice]
+    classifier.client.chat.completions.create = MagicMock(return_value=mock_response)
 
     filepath = _make_temp_file("recipe.pdf")
     result = classifier._classify_with_ai(filepath)
