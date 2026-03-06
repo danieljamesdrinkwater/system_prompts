@@ -110,7 +110,7 @@ def is_file_stable(filepath: Path, delay: float = 1.0) -> bool:
         if not filepath.exists():
             return False
         size2 = filepath.stat().st_size
-        return size1 == size2 and size2 > 0
+        return size1 == size2
     except OSError:
         return False
 
