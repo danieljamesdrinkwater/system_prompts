@@ -14,7 +14,7 @@ def test_load_defaults():
     assert "drop_zone" in config
     assert "hierarchy" in config
     assert "Documents" in config["hierarchy"]
-    assert config["ollama"]["model"] == "llama3.2"
+    assert config["ollama"]["model"] == "deepseek-r1:1.5b"
 
 
 def test_load_config_file():

@@ -167,7 +167,7 @@ class FileClassifier:
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": prompt},
             ],
-            options={"num_predict": 256},
+            options={"num_predict": 1024},
         )
 
         content = response["message"]["content"]
@@ -222,6 +222,9 @@ class FileClassifier:
 
     def _parse_json_response(self, content: str) -> dict | None:
         """Parse JSON from Ollama response with multiple fallback strategies."""
+        # Strip <think>...</think> blocks from reasoning models (e.g. deepseek-r1)
+        content = re.sub(r'<think>.*?</think>', '', content, flags=re.DOTALL).strip()
+
         # Strategy 1: Direct parse
         try:
             return json.loads(content.strip())

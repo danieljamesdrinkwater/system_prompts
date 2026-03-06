@@ -85,6 +85,17 @@ def test_parse_json_with_text():
     assert result["category"] == "Code/Scripts"
 
 
+def test_parse_json_with_think_tags():
+    """Classifier strips <think> blocks from reasoning models like deepseek-r1."""
+    config = load_config(None)
+    classifier = FileClassifier(config)
+
+    response = '<think>\nLet me analyze this file. It has a .pdf extension and the name suggests it is a financial document.\n</think>\n{"category": "Documents/Finance/Invoices", "suggested_name": "invoice-march.pdf", "confidence": "high", "reasoning": "invoice document"}'
+    result = classifier._parse_json_response(response)
+    assert result is not None
+    assert result["category"] == "Documents/Finance/Invoices"
+
+
 def test_parse_json_invalid():
     """Invalid JSON returns None."""
     config = load_config(None)

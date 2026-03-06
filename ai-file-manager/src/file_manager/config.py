@@ -8,7 +8,7 @@ import yaml
 DEFAULT_CONFIG = {
     "drop_zone": "~/Desktop/File Manager",
     "ollama": {
-        "model": "llama3.2",
+        "model": "deepseek-r1:1.5b",
         "host": "http://localhost:11434",
         "timeout": 30,
         "analyze_content": True,
