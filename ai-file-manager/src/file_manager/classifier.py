@@ -20,38 +20,38 @@ You are a file organization assistant. You categorize files into a folder hierar
 You MUST respond with valid JSON only. No markdown, no explanation, no extra text.
 
 The folder hierarchy is:
-- 01 - Documents/Work
-- 01 - Documents/Personal
-- 01 - Documents/Finance/Invoices
-- 01 - Documents/Finance/Receipts
-- 01 - Documents/Finance/Statements
-- 01 - Documents/Education
-- 01 - Documents/Legal
-- 01 - Documents/Medical
-- 01 - Documents/Notes
-- 02 - Images/Photos
-- 02 - Images/Screenshots
-- 02 - Images/Graphics
-- 02 - Images/Icons
-- 02 - Images/Wallpapers
-- 03 - Videos/Recordings
-- 03 - Videos/Tutorials
-- 03 - Videos/Personal
-- 04 - Audio/Music
-- 04 - Audio/Podcasts
-- 04 - Audio/Recordings
-- 04 - Audio/Sound Effects
-- 05 - Downloads/Installers
-- 05 - Downloads/Archives
-- 05 - Downloads/Packages
-- 06 - Code/Scripts
-- 06 - Code/Projects
-- 06 - Code/Snippets
-- 06 - Code/Data
-- 07 - Design/PSD
-- 07 - Design/Figma Exports
-- 07 - Design/SVG
-- 07 - Design/Mockups
+- 01 - Documents/01 - Work
+- 01 - Documents/02 - Personal
+- 01 - Documents/03 - Finance/01 - Invoices
+- 01 - Documents/03 - Finance/02 - Receipts
+- 01 - Documents/03 - Finance/03 - Statements
+- 01 - Documents/04 - Education
+- 01 - Documents/05 - Legal
+- 01 - Documents/06 - Medical
+- 01 - Documents/07 - Notes
+- 02 - Images/01 - Photos
+- 02 - Images/02 - Screenshots
+- 02 - Images/03 - Graphics
+- 02 - Images/04 - Icons
+- 02 - Images/05 - Wallpapers
+- 03 - Videos/01 - Recordings
+- 03 - Videos/02 - Tutorials
+- 03 - Videos/03 - Personal
+- 04 - Audio/01 - Music
+- 04 - Audio/02 - Podcasts
+- 04 - Audio/03 - Recordings
+- 04 - Audio/04 - Sound Effects
+- 05 - Downloads/01 - Installers
+- 05 - Downloads/02 - Archives
+- 05 - Downloads/03 - Packages
+- 06 - Code/01 - Scripts
+- 06 - Code/02 - Projects
+- 06 - Code/03 - Snippets
+- 06 - Code/04 - Data
+- 07 - Design/01 - PSD
+- 07 - Design/02 - Figma Exports
+- 07 - Design/03 - SVG
+- 07 - Design/04 - Mockups
 - 08 - Miscellaneous
 
 Rules for suggested filenames:
@@ -68,49 +68,49 @@ Respond ONLY with JSON in this format:
 # Extension-to-subcategory fast mappings for unambiguous file types
 EXTENSION_FAST_MAP: dict[str, str] = {
     # Audio
-    ".mp3": "04 - Audio/Music",
-    ".flac": "04 - Audio/Music",
-    ".wav": "04 - Audio/Music",
-    ".aac": "04 - Audio/Music",
-    ".ogg": "04 - Audio/Music",
-    ".m4a": "04 - Audio/Music",
-    ".wma": "04 - Audio/Music",
+    ".mp3": "04 - Audio/01 - Music",
+    ".flac": "04 - Audio/01 - Music",
+    ".wav": "04 - Audio/01 - Music",
+    ".aac": "04 - Audio/01 - Music",
+    ".ogg": "04 - Audio/01 - Music",
+    ".m4a": "04 - Audio/01 - Music",
+    ".wma": "04 - Audio/01 - Music",
     # Video
-    ".mp4": "03 - Videos/Recordings",
-    ".mov": "03 - Videos/Recordings",
-    ".avi": "03 - Videos/Recordings",
-    ".mkv": "03 - Videos/Recordings",
-    ".wmv": "03 - Videos/Recordings",
-    ".flv": "03 - Videos/Recordings",
-    ".webm": "03 - Videos/Recordings",
+    ".mp4": "03 - Videos/01 - Recordings",
+    ".mov": "03 - Videos/01 - Recordings",
+    ".avi": "03 - Videos/01 - Recordings",
+    ".mkv": "03 - Videos/01 - Recordings",
+    ".wmv": "03 - Videos/01 - Recordings",
+    ".flv": "03 - Videos/01 - Recordings",
+    ".webm": "03 - Videos/01 - Recordings",
     # Installers
-    ".exe": "05 - Downloads/Installers",
-    ".msi": "05 - Downloads/Installers",
-    ".dmg": "05 - Downloads/Installers",
-    ".pkg": "05 - Downloads/Installers",
-    ".deb": "05 - Downloads/Installers",
-    ".rpm": "05 - Downloads/Installers",
-    ".appimage": "05 - Downloads/Installers",
+    ".exe": "05 - Downloads/01 - Installers",
+    ".msi": "05 - Downloads/01 - Installers",
+    ".dmg": "05 - Downloads/01 - Installers",
+    ".pkg": "05 - Downloads/01 - Installers",
+    ".deb": "05 - Downloads/01 - Installers",
+    ".rpm": "05 - Downloads/01 - Installers",
+    ".appimage": "05 - Downloads/01 - Installers",
     # Archives
-    ".zip": "05 - Downloads/Archives",
-    ".tar": "05 - Downloads/Archives",
-    ".gz": "05 - Downloads/Archives",
-    ".7z": "05 - Downloads/Archives",
-    ".rar": "05 - Downloads/Archives",
-    ".bz2": "05 - Downloads/Archives",
-    ".xz": "05 - Downloads/Archives",
+    ".zip": "05 - Downloads/02 - Archives",
+    ".tar": "05 - Downloads/02 - Archives",
+    ".gz": "05 - Downloads/02 - Archives",
+    ".7z": "05 - Downloads/02 - Archives",
+    ".rar": "05 - Downloads/02 - Archives",
+    ".bz2": "05 - Downloads/02 - Archives",
+    ".xz": "05 - Downloads/02 - Archives",
     # Design
-    ".psd": "07 - Design/PSD",
-    ".ai": "07 - Design/PSD",
-    ".sketch": "07 - Design/Mockups",
-    ".fig": "07 - Design/Figma Exports",
-    ".xd": "07 - Design/Mockups",
-    ".indd": "07 - Design/PSD",
+    ".psd": "07 - Design/01 - PSD",
+    ".ai": "07 - Design/01 - PSD",
+    ".sketch": "07 - Design/04 - Mockups",
+    ".fig": "07 - Design/02 - Figma Exports",
+    ".xd": "07 - Design/04 - Mockups",
+    ".indd": "07 - Design/01 - PSD",
     # Images — photos by default, AI refines
-    ".ico": "02 - Images/Icons",
-    ".heic": "02 - Images/Photos",
-    ".bmp": "02 - Images/Photos",
-    ".tiff": "02 - Images/Photos",
+    ".ico": "02 - Images/04 - Icons",
+    ".heic": "02 - Images/01 - Photos",
+    ".bmp": "02 - Images/01 - Photos",
+    ".tiff": "02 - Images/01 - Photos",
 }
 
 

@@ -18,17 +18,17 @@ logging:
   backup_count: 3
 
 hierarchy:
-  Documents:
+  "01 - Documents":
     subcategories:
-      - Work
-      - Personal
-      - Finance/Invoices
-      - Finance/Receipts
-      - Finance/Statements
-      - Education
-      - Legal
-      - Medical
-      - Notes
+      - "01 - Work"
+      - "02 - Personal"
+      - "03 - Finance/01 - Invoices"
+      - "03 - Finance/02 - Receipts"
+      - "03 - Finance/03 - Statements"
+      - "04 - Education"
+      - "05 - Legal"
+      - "06 - Medical"
+      - "07 - Notes"
     extensions:
       - .pdf
       - .doc
@@ -42,13 +42,13 @@ hierarchy:
       - .txt
       - .md
       - .csv
-  Images:
+  "02 - Images":
     subcategories:
-      - Photos
-      - Screenshots
-      - Graphics
-      - Icons
-      - Wallpapers
+      - "01 - Photos"
+      - "02 - Screenshots"
+      - "03 - Graphics"
+      - "04 - Icons"
+      - "05 - Wallpapers"
     extensions:
       - .jpg
       - .jpeg
@@ -60,11 +60,11 @@ hierarchy:
       - .heic
       - .ico
       - .svg
-  Videos:
+  "03 - Videos":
     subcategories:
-      - Recordings
-      - Tutorials
-      - Personal
+      - "01 - Recordings"
+      - "02 - Tutorials"
+      - "03 - Personal"
     extensions:
       - .mp4
       - .mov
@@ -73,12 +73,12 @@ hierarchy:
       - .wmv
       - .flv
       - .webm
-  Audio:
+  "04 - Audio":
     subcategories:
-      - Music
-      - Podcasts
-      - Recordings
-      - Sound Effects
+      - "01 - Music"
+      - "02 - Podcasts"
+      - "03 - Recordings"
+      - "04 - Sound Effects"
     extensions:
       - .mp3
       - .wav
@@ -87,11 +87,11 @@ hierarchy:
       - .ogg
       - .m4a
       - .wma
-  Downloads:
+  "05 - Downloads":
     subcategories:
-      - Installers
-      - Archives
-      - Packages
+      - "01 - Installers"
+      - "02 - Archives"
+      - "03 - Packages"
     extensions:
       - .exe
       - .msi
@@ -107,12 +107,12 @@ hierarchy:
       - .rar
       - .bz2
       - .xz
-  Code:
+  "06 - Code":
     subcategories:
-      - Scripts
-      - Projects
-      - Snippets
-      - Data
+      - "01 - Scripts"
+      - "02 - Projects"
+      - "03 - Snippets"
+      - "04 - Data"
     extensions:
       - .py
       - .js
@@ -134,12 +134,12 @@ hierarchy:
       - .toml
       - .ini
       - .cfg
-  Design:
+  "07 - Design":
     subcategories:
-      - PSD
-      - Figma Exports
-      - SVG
-      - Mockups
+      - "01 - PSD"
+      - "02 - Figma Exports"
+      - "03 - SVG"
+      - "04 - Mockups"
     extensions:
       - .psd
       - .ai
@@ -147,6 +147,6 @@ hierarchy:
       - .fig
       - .xd
       - .indd
-  Miscellaneous:
+  "08 - Miscellaneous":
     subcategories: []
     extensions: []

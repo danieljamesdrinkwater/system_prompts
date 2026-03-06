@@ -47,8 +47,8 @@ def test_get_valid_categories():
     config = load_config(None)
     categories = get_valid_categories(config)
     assert "01 - Documents" in categories
-    assert "01 - Documents/Work" in categories
-    assert "01 - Documents/Finance/Invoices" in categories
+    assert "01 - Documents/01 - Work" in categories
+    assert "01 - Documents/03 - Finance/01 - Invoices" in categories
     assert "08 - Miscellaneous" in categories
 
 

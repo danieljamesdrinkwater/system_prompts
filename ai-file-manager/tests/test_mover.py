@@ -22,7 +22,7 @@ def test_move_file():
         source.write_text("hello")
 
         classification = ClassificationResult(
-            category="01 - Documents/Work",
+            category="01 - Documents/01 - Work",
             suggested_name="test.pdf",
             confidence="high",
             reasoning="test",
@@ -31,7 +31,7 @@ def test_move_file():
         result = mover.move_file(source, classification)
         assert result is not None
         assert result.exists()
-        assert result == Path(tmpdir) / "01 - Documents" / "Work" / "test.pdf"
+        assert result == Path(tmpdir) / "01 - Documents" / "01 - Work" / "test.pdf"
         assert not source.exists()
 
 
@@ -42,7 +42,7 @@ def test_move_file_duplicate():
         mover = FileMover(config)
 
         # Create target directory with existing file
-        target_dir = Path(tmpdir) / "01 - Documents" / "Work"
+        target_dir = Path(tmpdir) / "01 - Documents" / "01 - Work"
         target_dir.mkdir(parents=True)
         (target_dir / "test.pdf").write_text("existing")
 
@@ -51,7 +51,7 @@ def test_move_file_duplicate():
         source.write_text("new")
 
         classification = ClassificationResult(
-            category="01 - Documents/Work",
+            category="01 - Documents/01 - Work",
             suggested_name="test.pdf",
             confidence="high",
             reasoning="test",
@@ -69,7 +69,7 @@ def test_move_file_multiple_duplicates():
         config = _make_config(tmpdir)
         mover = FileMover(config)
 
-        target_dir = Path(tmpdir) / "02 - Images" / "Photos"
+        target_dir = Path(tmpdir) / "02 - Images" / "01 - Photos"
         target_dir.mkdir(parents=True)
         (target_dir / "photo.jpg").write_text("1")
         (target_dir / "photo_2.jpg").write_text("2")
@@ -78,7 +78,7 @@ def test_move_file_multiple_duplicates():
         source.write_text("3")
 
         classification = ClassificationResult(
-            category="02 - Images/Photos",
+            category="02 - Images/01 - Photos",
             suggested_name="photo.jpg",
             confidence="high",
             reasoning="test",
@@ -98,7 +98,7 @@ def test_move_file_source_missing():
         source = Path(tmpdir) / "gone.pdf"
 
         classification = ClassificationResult(
-            category="01 - Documents/Work",
+            category="01 - Documents/01 - Work",
             suggested_name="gone.pdf",
             confidence="high",
             reasoning="test",
@@ -118,7 +118,7 @@ def test_move_creates_directories():
         source.write_text("content")
 
         classification = ClassificationResult(
-            category="01 - Documents/Finance/Invoices",
+            category="01 - Documents/03 - Finance/01 - Invoices",
             suggested_name="invoice.pdf",
             confidence="high",
             reasoning="test",

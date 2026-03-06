@@ -31,7 +31,7 @@ def test_fast_path_mp3():
     filepath = _make_temp_file("song.mp3")
 
     result = classifier.classify(filepath)
-    assert result.category == "04 - Audio/Music"
+    assert result.category == "04 - Audio/01 - Music"
     assert result.confidence == "high"
     assert "song.mp3" == result.suggested_name
 
@@ -43,7 +43,7 @@ def test_fast_path_zip():
     filepath = _make_temp_file("backup.zip")
 
     result = classifier.classify(filepath)
-    assert result.category == "05 - Downloads/Archives"
+    assert result.category == "05 - Downloads/02 - Archives"
     assert result.confidence == "high"
 
 
@@ -54,7 +54,7 @@ def test_fast_path_exe():
     filepath = _make_temp_file("setup.exe")
 
     result = classifier.classify(filepath)
-    assert result.category == "05 - Downloads/Installers"
+    assert result.category == "05 - Downloads/01 - Installers"
 
 
 def test_parse_json_clean():
@@ -63,13 +63,13 @@ def test_parse_json_clean():
     classifier = FileClassifier(config)
 
     response = json.dumps({
-        "category": "01 - Documents/Work",
+        "category": "01 - Documents/01 - Work",
         "suggested_name": "quarterly-report.pdf",
         "confidence": "high",
         "reasoning": "Quarterly report document",
     })
     result = classifier._parse_json_response(response)
-    assert result["category"] == "01 - Documents/Work"
+    assert result["category"] == "01 - Documents/01 - Work"
 
 
 def test_parse_json_markdown_block():
@@ -77,9 +77,9 @@ def test_parse_json_markdown_block():
     config = _make_config()
     classifier = FileClassifier(config)
 
-    response = '```json\n{"category": "02 - Images/Photos", "suggested_name": "sunset.jpg", "confidence": "high", "reasoning": "photo"}\n```'
+    response = '```json\n{"category": "02 - Images/01 - Photos", "suggested_name": "sunset.jpg", "confidence": "high", "reasoning": "photo"}\n```'
     result = classifier._parse_json_response(response)
-    assert result["category"] == "02 - Images/Photos"
+    assert result["category"] == "02 - Images/01 - Photos"
 
 
 def test_parse_json_with_text():
@@ -87,9 +87,9 @@ def test_parse_json_with_text():
     config = _make_config()
     classifier = FileClassifier(config)
 
-    response = 'Here is the classification:\n{"category": "06 - Code/Scripts", "suggested_name": "deploy.sh", "confidence": "medium", "reasoning": "shell script"}\nDone.'
+    response = 'Here is the classification:\n{"category": "06 - Code/01 - Scripts", "suggested_name": "deploy.sh", "confidence": "medium", "reasoning": "shell script"}\nDone.'
     result = classifier._parse_json_response(response)
-    assert result["category"] == "06 - Code/Scripts"
+    assert result["category"] == "06 - Code/01 - Scripts"
 
 
 def test_parse_json_with_think_tags():
@@ -97,10 +97,10 @@ def test_parse_json_with_think_tags():
     config = _make_config()
     classifier = FileClassifier(config)
 
-    response = '<think>\nLet me analyze this file. It has a .pdf extension and the name suggests it is a financial document.\n</think>\n{"category": "01 - Documents/Finance/Invoices", "suggested_name": "invoice-march.pdf", "confidence": "high", "reasoning": "invoice document"}'
+    response = '<think>\nLet me analyze this file. It has a .pdf extension and the name suggests it is a financial document.\n</think>\n{"category": "01 - Documents/03 - Finance/01 - Invoices", "suggested_name": "invoice-march.pdf", "confidence": "high", "reasoning": "invoice document"}'
     result = classifier._parse_json_response(response)
     assert result is not None
-    assert result["category"] == "01 - Documents/Finance/Invoices"
+    assert result["category"] == "01 - Documents/03 - Finance/01 - Invoices"
 
 
 def test_parse_json_invalid():
@@ -141,7 +141,7 @@ def test_ai_classification():
     # Mock the OpenAI client's chat completions
     mock_message = MagicMock()
     mock_message.content = json.dumps({
-        "category": "01 - Documents/Finance/Invoices",
+        "category": "01 - Documents/03 - Finance/01 - Invoices",
         "suggested_name": "2024-03-electricity-bill.pdf",
         "confidence": "high",
         "reasoning": "Electricity bill invoice",
@@ -154,7 +154,7 @@ def test_ai_classification():
 
     filepath = _make_temp_file("report.pdf", content="Electricity bill for March 2024")
     result = classifier._classify_with_ai(filepath)
-    assert result.category == "01 - Documents/Finance/Invoices"
+    assert result.category == "01 - Documents/03 - Finance/01 - Invoices"
     assert "electricity" in result.suggested_name
 
 

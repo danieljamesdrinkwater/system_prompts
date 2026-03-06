@@ -24,8 +24,10 @@ DEFAULT_CONFIG = {
     "hierarchy": {
         "01 - Documents": {
             "subcategories": [
-                "Work", "Personal", "Finance/Invoices", "Finance/Receipts",
-                "Finance/Statements", "Education", "Legal", "Medical", "Notes",
+                "01 - Work", "02 - Personal",
+                "03 - Finance/01 - Invoices", "03 - Finance/02 - Receipts",
+                "03 - Finance/03 - Statements",
+                "04 - Education", "05 - Legal", "06 - Medical", "07 - Notes",
             ],
             "extensions": [
                 ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx",
@@ -33,27 +35,34 @@ DEFAULT_CONFIG = {
             ],
         },
         "02 - Images": {
-            "subcategories": ["Photos", "Screenshots", "Graphics", "Icons", "Wallpapers"],
+            "subcategories": [
+                "01 - Photos", "02 - Screenshots", "03 - Graphics",
+                "04 - Icons", "05 - Wallpapers",
+            ],
             "extensions": [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp", ".heic", ".ico", ".svg"],
         },
         "03 - Videos": {
-            "subcategories": ["Recordings", "Tutorials", "Personal"],
+            "subcategories": ["01 - Recordings", "02 - Tutorials", "03 - Personal"],
             "extensions": [".mp4", ".mov", ".avi", ".mkv", ".wmv", ".flv", ".webm"],
         },
         "04 - Audio": {
-            "subcategories": ["Music", "Podcasts", "Recordings", "Sound Effects"],
+            "subcategories": [
+                "01 - Music", "02 - Podcasts", "03 - Recordings", "04 - Sound Effects",
+            ],
             "extensions": [".mp3", ".wav", ".flac", ".aac", ".ogg", ".m4a", ".wma"],
         },
         "05 - Downloads": {
-            "subcategories": ["Installers", "Archives", "Packages"],
+            "subcategories": ["01 - Installers", "02 - Archives", "03 - Packages"],
             "extensions": [".exe", ".msi", ".dmg", ".pkg", ".deb", ".rpm", ".appimage", ".zip", ".tar", ".gz", ".7z", ".rar", ".bz2", ".xz"],
         },
         "06 - Code": {
-            "subcategories": ["Scripts", "Projects", "Snippets", "Data"],
+            "subcategories": ["01 - Scripts", "02 - Projects", "03 - Snippets", "04 - Data"],
             "extensions": [".py", ".js", ".ts", ".java", ".c", ".cpp", ".go", ".rs", ".rb", ".sh", ".bat", ".ps1", ".sql", ".json", ".xml", ".yaml", ".yml", ".toml", ".ini", ".cfg"],
         },
         "07 - Design": {
-            "subcategories": ["PSD", "Figma Exports", "SVG", "Mockups"],
+            "subcategories": [
+                "01 - PSD", "02 - Figma Exports", "03 - SVG", "04 - Mockups",
+            ],
             "extensions": [".psd", ".ai", ".sketch", ".fig", ".xd", ".indd"],
         },
         "08 - Miscellaneous": {
