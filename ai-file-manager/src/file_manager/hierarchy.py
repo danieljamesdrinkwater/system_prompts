@@ -1,13 +1,41 @@
 """Folder hierarchy creation and validation."""
 
+import platform
+import subprocess
 from pathlib import Path
 from typing import Any
 
 ORANGE_ICON = Path(__file__).resolve().parent.parent.parent / "assets" / "folder-orange.svg"
 
+# macOS Finder orange label index (used by AppleScript)
+_MACOS_ORANGE_LABEL = 1
+
 
 def _set_folder_icon(folder: Path) -> None:
-    """Write a .directory file so file managers show an orange folder icon."""
+    """Set an orange folder icon/label, supporting both macOS and Linux."""
+    if platform.system() == "Darwin":
+        _set_macos_label(folder)
+    else:
+        _set_linux_icon(folder)
+
+
+def _set_macos_label(folder: Path) -> None:
+    """Set the macOS Finder label to orange via AppleScript."""
+    script = (
+        f'tell application "Finder" to set label index of '
+        f'(POSIX file "{folder}" as alias) to {_MACOS_ORANGE_LABEL}'
+    )
+    try:
+        subprocess.run(
+            ["osascript", "-e", script],
+            capture_output=True, timeout=5,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        pass
+
+
+def _set_linux_icon(folder: Path) -> None:
+    """Write a .directory file so Linux file managers show an orange folder icon."""
     if not ORANGE_ICON.exists():
         return
     dotdir = folder / ".directory"
