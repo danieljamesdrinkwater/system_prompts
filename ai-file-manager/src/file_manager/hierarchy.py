@@ -3,6 +3,17 @@
 from pathlib import Path
 from typing import Any
 
+ORANGE_ICON = Path(__file__).resolve().parent.parent.parent / "assets" / "folder-orange.svg"
+
+
+def _set_folder_icon(folder: Path) -> None:
+    """Write a .directory file so file managers show an orange folder icon."""
+    if not ORANGE_ICON.exists():
+        return
+    dotdir = folder / ".directory"
+    if not dotdir.exists():
+        dotdir.write_text(f"[Desktop Entry]\nIcon={ORANGE_ICON}\n")
+
 
 def create_hierarchy(base_path: str | Path, config: dict[str, Any]) -> None:
     """Create the full folder hierarchy under the base path.
@@ -15,7 +26,9 @@ def create_hierarchy(base_path: str | Path, config: dict[str, Any]) -> None:
     base.mkdir(parents=True, exist_ok=True)
 
     for top_level, info in config["hierarchy"].items():
-        (base / top_level).mkdir(exist_ok=True)
+        top_dir = base / top_level
+        top_dir.mkdir(exist_ok=True)
+        _set_folder_icon(top_dir)
         for sub in info.get("subcategories", []):
             (base / top_level / sub).mkdir(parents=True, exist_ok=True)
 

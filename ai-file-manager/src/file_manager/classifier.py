@@ -20,39 +20,39 @@ You are a file organization assistant. You categorize files into a folder hierar
 You MUST respond with valid JSON only. No markdown, no explanation, no extra text.
 
 The folder hierarchy is:
-- Documents/Work
-- Documents/Personal
-- Documents/Finance/Invoices
-- Documents/Finance/Receipts
-- Documents/Finance/Statements
-- Documents/Education
-- Documents/Legal
-- Documents/Medical
-- Documents/Notes
-- Images/Photos
-- Images/Screenshots
-- Images/Graphics
-- Images/Icons
-- Images/Wallpapers
-- Videos/Recordings
-- Videos/Tutorials
-- Videos/Personal
-- Audio/Music
-- Audio/Podcasts
-- Audio/Recordings
-- Audio/Sound Effects
-- Downloads/Installers
-- Downloads/Archives
-- Downloads/Packages
-- Code/Scripts
-- Code/Projects
-- Code/Snippets
-- Code/Data
-- Design/PSD
-- Design/Figma Exports
-- Design/SVG
-- Design/Mockups
-- Miscellaneous
+- 01 - Documents/Work
+- 01 - Documents/Personal
+- 01 - Documents/Finance/Invoices
+- 01 - Documents/Finance/Receipts
+- 01 - Documents/Finance/Statements
+- 01 - Documents/Education
+- 01 - Documents/Legal
+- 01 - Documents/Medical
+- 01 - Documents/Notes
+- 02 - Images/Photos
+- 02 - Images/Screenshots
+- 02 - Images/Graphics
+- 02 - Images/Icons
+- 02 - Images/Wallpapers
+- 03 - Videos/Recordings
+- 03 - Videos/Tutorials
+- 03 - Videos/Personal
+- 04 - Audio/Music
+- 04 - Audio/Podcasts
+- 04 - Audio/Recordings
+- 04 - Audio/Sound Effects
+- 05 - Downloads/Installers
+- 05 - Downloads/Archives
+- 05 - Downloads/Packages
+- 06 - Code/Scripts
+- 06 - Code/Projects
+- 06 - Code/Snippets
+- 06 - Code/Data
+- 07 - Design/PSD
+- 07 - Design/Figma Exports
+- 07 - Design/SVG
+- 07 - Design/Mockups
+- 08 - Miscellaneous
 
 Rules for suggested filenames:
 - Use lowercase with hyphens as separators
@@ -68,49 +68,49 @@ Respond ONLY with JSON in this format:
 # Extension-to-subcategory fast mappings for unambiguous file types
 EXTENSION_FAST_MAP: dict[str, str] = {
     # Audio
-    ".mp3": "Audio/Music",
-    ".flac": "Audio/Music",
-    ".wav": "Audio/Music",
-    ".aac": "Audio/Music",
-    ".ogg": "Audio/Music",
-    ".m4a": "Audio/Music",
-    ".wma": "Audio/Music",
+    ".mp3": "04 - Audio/Music",
+    ".flac": "04 - Audio/Music",
+    ".wav": "04 - Audio/Music",
+    ".aac": "04 - Audio/Music",
+    ".ogg": "04 - Audio/Music",
+    ".m4a": "04 - Audio/Music",
+    ".wma": "04 - Audio/Music",
     # Video
-    ".mp4": "Videos/Recordings",
-    ".mov": "Videos/Recordings",
-    ".avi": "Videos/Recordings",
-    ".mkv": "Videos/Recordings",
-    ".wmv": "Videos/Recordings",
-    ".flv": "Videos/Recordings",
-    ".webm": "Videos/Recordings",
+    ".mp4": "03 - Videos/Recordings",
+    ".mov": "03 - Videos/Recordings",
+    ".avi": "03 - Videos/Recordings",
+    ".mkv": "03 - Videos/Recordings",
+    ".wmv": "03 - Videos/Recordings",
+    ".flv": "03 - Videos/Recordings",
+    ".webm": "03 - Videos/Recordings",
     # Installers
-    ".exe": "Downloads/Installers",
-    ".msi": "Downloads/Installers",
-    ".dmg": "Downloads/Installers",
-    ".pkg": "Downloads/Installers",
-    ".deb": "Downloads/Installers",
-    ".rpm": "Downloads/Installers",
-    ".appimage": "Downloads/Installers",
+    ".exe": "05 - Downloads/Installers",
+    ".msi": "05 - Downloads/Installers",
+    ".dmg": "05 - Downloads/Installers",
+    ".pkg": "05 - Downloads/Installers",
+    ".deb": "05 - Downloads/Installers",
+    ".rpm": "05 - Downloads/Installers",
+    ".appimage": "05 - Downloads/Installers",
     # Archives
-    ".zip": "Downloads/Archives",
-    ".tar": "Downloads/Archives",
-    ".gz": "Downloads/Archives",
-    ".7z": "Downloads/Archives",
-    ".rar": "Downloads/Archives",
-    ".bz2": "Downloads/Archives",
-    ".xz": "Downloads/Archives",
+    ".zip": "05 - Downloads/Archives",
+    ".tar": "05 - Downloads/Archives",
+    ".gz": "05 - Downloads/Archives",
+    ".7z": "05 - Downloads/Archives",
+    ".rar": "05 - Downloads/Archives",
+    ".bz2": "05 - Downloads/Archives",
+    ".xz": "05 - Downloads/Archives",
     # Design
-    ".psd": "Design/PSD",
-    ".ai": "Design/PSD",
-    ".sketch": "Design/Mockups",
-    ".fig": "Design/Figma Exports",
-    ".xd": "Design/Mockups",
-    ".indd": "Design/PSD",
+    ".psd": "07 - Design/PSD",
+    ".ai": "07 - Design/PSD",
+    ".sketch": "07 - Design/Mockups",
+    ".fig": "07 - Design/Figma Exports",
+    ".xd": "07 - Design/Mockups",
+    ".indd": "07 - Design/PSD",
     # Images — photos by default, AI refines
-    ".ico": "Images/Icons",
-    ".heic": "Images/Photos",
-    ".bmp": "Images/Photos",
-    ".tiff": "Images/Photos",
+    ".ico": "02 - Images/Icons",
+    ".heic": "02 - Images/Photos",
+    ".bmp": "02 - Images/Photos",
+    ".tiff": "02 - Images/Photos",
 }
 
 
@@ -183,14 +183,14 @@ class FileClassifier:
             return self._fallback_classification(filepath)
 
         # Validate the category
-        category = parsed.get("category", "Miscellaneous")
+        category = parsed.get("category", "08 - Miscellaneous")
         if category not in self.valid_categories:
             # Try just the top-level
             top = category.split("/")[0]
             if top in self.config["hierarchy"]:
                 category = top
             else:
-                category = "Miscellaneous"
+                category = "08 - Miscellaneous"
 
         suggested_name = parsed.get("suggested_name", sanitize_filename(filepath.name))
         # Ensure the extension is preserved
@@ -258,7 +258,7 @@ class FileClassifier:
     def _fallback_classification(self, filepath: Path) -> ClassificationResult:
         """Classify using extension only when AI fails."""
         ext = filepath.suffix.lower()
-        category = self.extension_map.get(ext, "Miscellaneous")
+        category = self.extension_map.get(ext, "08 - Miscellaneous")
 
         return ClassificationResult(
             category=category,

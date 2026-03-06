@@ -13,7 +13,7 @@ def test_load_defaults():
     config = load_config(None)
     assert "drop_zone" in config
     assert "hierarchy" in config
-    assert "Documents" in config["hierarchy"]
+    assert "01 - Documents" in config["hierarchy"]
     assert config["openrouter"]["model"] == "google/gemini-2.0-flash-001"
 
 
@@ -32,7 +32,7 @@ def test_load_config_file():
     assert config["stabilization_delay"] == 5.0
     # Defaults should still be present for non-overridden keys
     assert config["openrouter"]["timeout"] == 30
-    assert "Documents" in config["hierarchy"]
+    assert "01 - Documents" in config["hierarchy"]
 
 
 def test_paths_expanded():
@@ -46,18 +46,18 @@ def test_get_valid_categories():
     """Valid categories includes top-level and subcategories."""
     config = load_config(None)
     categories = get_valid_categories(config)
-    assert "Documents" in categories
-    assert "Documents/Work" in categories
-    assert "Documents/Finance/Invoices" in categories
-    assert "Miscellaneous" in categories
+    assert "01 - Documents" in categories
+    assert "01 - Documents/Work" in categories
+    assert "01 - Documents/Finance/Invoices" in categories
+    assert "08 - Miscellaneous" in categories
 
 
 def test_build_extension_map():
     """Extension map covers expected extensions."""
     config = load_config(None)
     ext_map = build_extension_map(config)
-    assert ext_map[".pdf"] == "Documents"
-    assert ext_map[".mp3"] == "Audio"
-    assert ext_map[".py"] == "Code"
-    assert ext_map[".jpg"] == "Images"
-    assert ext_map[".zip"] == "Downloads"
+    assert ext_map[".pdf"] == "01 - Documents"
+    assert ext_map[".mp3"] == "04 - Audio"
+    assert ext_map[".py"] == "06 - Code"
+    assert ext_map[".jpg"] == "02 - Images"
+    assert ext_map[".zip"] == "05 - Downloads"

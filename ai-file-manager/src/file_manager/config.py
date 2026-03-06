@@ -22,7 +22,7 @@ DEFAULT_CONFIG = {
         "backup_count": 3,
     },
     "hierarchy": {
-        "Documents": {
+        "01 - Documents": {
             "subcategories": [
                 "Work", "Personal", "Finance/Invoices", "Finance/Receipts",
                 "Finance/Statements", "Education", "Legal", "Medical", "Notes",
@@ -32,31 +32,31 @@ DEFAULT_CONFIG = {
                 ".odt", ".rtf", ".txt", ".md", ".csv",
             ],
         },
-        "Images": {
+        "02 - Images": {
             "subcategories": ["Photos", "Screenshots", "Graphics", "Icons", "Wallpapers"],
             "extensions": [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".webp", ".heic", ".ico", ".svg"],
         },
-        "Videos": {
+        "03 - Videos": {
             "subcategories": ["Recordings", "Tutorials", "Personal"],
             "extensions": [".mp4", ".mov", ".avi", ".mkv", ".wmv", ".flv", ".webm"],
         },
-        "Audio": {
+        "04 - Audio": {
             "subcategories": ["Music", "Podcasts", "Recordings", "Sound Effects"],
             "extensions": [".mp3", ".wav", ".flac", ".aac", ".ogg", ".m4a", ".wma"],
         },
-        "Downloads": {
+        "05 - Downloads": {
             "subcategories": ["Installers", "Archives", "Packages"],
             "extensions": [".exe", ".msi", ".dmg", ".pkg", ".deb", ".rpm", ".appimage", ".zip", ".tar", ".gz", ".7z", ".rar", ".bz2", ".xz"],
         },
-        "Code": {
+        "06 - Code": {
             "subcategories": ["Scripts", "Projects", "Snippets", "Data"],
             "extensions": [".py", ".js", ".ts", ".java", ".c", ".cpp", ".go", ".rs", ".rb", ".sh", ".bat", ".ps1", ".sql", ".json", ".xml", ".yaml", ".yml", ".toml", ".ini", ".cfg"],
         },
-        "Design": {
+        "07 - Design": {
             "subcategories": ["PSD", "Figma Exports", "SVG", "Mockups"],
             "extensions": [".psd", ".ai", ".sketch", ".fig", ".xd", ".indd"],
         },
-        "Miscellaneous": {
+        "08 - Miscellaneous": {
             "subcategories": [],
             "extensions": [],
         },
