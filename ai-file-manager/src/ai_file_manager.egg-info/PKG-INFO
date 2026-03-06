@@ -1,0 +1,15 @@
+Metadata-Version: 2.4
+Name: ai-file-manager
+Version: 0.1.0
+Summary: AI-powered local file organizer using Ollama
+Requires-Python: >=3.10
+Requires-Dist: watchdog>=4.0.0
+Requires-Dist: ollama>=0.3.0
+Requires-Dist: pyyaml>=6.0
+Provides-Extra: pdf
+Requires-Dist: PyPDF2>=3.0.0; extra == "pdf"
+Provides-Extra: magic
+Requires-Dist: python-magic>=0.4.27; extra == "magic"
+Provides-Extra: dev
+Requires-Dist: pytest>=8.0; extra == "dev"
+Requires-Dist: pytest-mock>=3.12; extra == "dev"

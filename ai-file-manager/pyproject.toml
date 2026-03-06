@@ -1,0 +1,25 @@
+[project]
+name = "ai-file-manager"
+version = "0.1.0"
+description = "AI-powered local file organizer using Ollama"
+requires-python = ">=3.10"
+dependencies = [
+    "watchdog>=4.0.0",
+    "ollama>=0.3.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+pdf = ["PyPDF2>=3.0.0"]
+magic = ["python-magic>=0.4.27"]
+dev = ["pytest>=8.0", "pytest-mock>=3.12"]
+
+[project.scripts]
+file-manager = "file_manager.__main__:main"
+
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
