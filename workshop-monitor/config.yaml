@@ -29,8 +29,8 @@ search:
     - Hoddesdon
 
 telegram:
-  bot_token: "YOUR_BOT_TOKEN_HERE"
-  chat_id: "YOUR_CHAT_ID_HERE"
+  bot_token: "8520074951:AAEB8arr3ItH_--YtUhfg5Xv4zdTw4nCS6k"
+  chat_id: "8055683209"
 
 whatsapp:
   phone: "+447301285414"
