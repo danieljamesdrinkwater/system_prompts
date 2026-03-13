@@ -80,8 +80,9 @@ class BaseScraper(ABC):
         self.config = config
         self.search_config = config.get("search", {})
         self.max_price = self.search_config.get("max_price", 350)
-        self.min_price = self.search_config.get("min_price", 0)
+        self.min_price = self.search_config.get("min_price", 200)
         self.keywords = self.search_config.get("keywords", [])
+        self.exclude_keywords = self.search_config.get("exclude_keywords", [])
 
     @abstractmethod
     def fetch_listings(self) -> list[Listing]:
@@ -95,7 +96,16 @@ class BaseScraper(ABC):
             return True  # Include if we can't parse price (manual check)
         return self.min_price <= price <= self.max_price
 
+    def is_excluded(self, listing: Listing) -> bool:
+        """Return True if listing matches any exclusion keyword."""
+        if not self.exclude_keywords:
+            return False
+        text = f"{listing.title} {listing.description}".lower()
+        return any(ex.lower() in text for ex in self.exclude_keywords)
+
     def filter_listings(self, listings: list[Listing]) -> list[Listing]:
-        """Apply price filter. All listings in the right price range are included
-        since cheap commercial units near the target area are likely relevant."""
-        return [l for l in listings if self.filter_by_price(l)]
+        """Apply price filter and exclude unwanted listing types."""
+        return [
+            l for l in listings
+            if self.filter_by_price(l) and not self.is_excluded(l)
+        ]
