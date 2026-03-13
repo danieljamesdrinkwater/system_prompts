@@ -30,9 +30,15 @@ class Listing:
         match = re.search(r"£?\s*(\d+(?:\.\d{2})?)", price_str)
         if match:
             value = float(match.group(1))
-            # If price looks weekly (common on Gumtree), multiply by ~4.33
+            # Per week -> per month
             if "pw" in price_str or "per week" in price_str or "/week" in price_str:
-                value *= 4.33
+                value *= 52 / 12
+            # Per annum -> per month
+            elif "pa" in price_str or "per annum" in price_str or "per year" in price_str:
+                value /= 12
+            # Heuristic: if value > 1000 and no period specified, likely annual
+            elif value > 1000 and "pcm" not in price_str and "per month" not in price_str:
+                value /= 12
             return value
         return None
 
