@@ -271,6 +271,9 @@ def evaluate_property(prop_element):
     is_bungalow = 'bungalow' in prop_type
     is_studio = 'studio' in prop_type or 'bedsit' in prop_type
     is_detached_1bed = 'detached' in prop_type and '1' in prop_type
+    is_maisonette_1bed = 'maisonette' in prop_type and '1' in prop_type
+    is_house_1bed = 'house' in prop_type and '1' in prop_type
+    is_sheltered = 'sheltered' in prop_type or 'retirement' in prop_type
 
     details = {
         'type': prop_type,
@@ -282,6 +285,10 @@ def evaluate_property(prop_element):
     # Rule: Studio/bedsit — never bid
     if is_studio:
         return False, False, "studio/bedsit - skip", details
+
+    # Rule: Sheltered/retirement — never bid
+    if is_sheltered:
+        return False, False, "sheltered/retirement - skip", details
 
     # Rule: Bungalow — always bid (no floor/price/garden filter)
     if is_bungalow:
@@ -298,6 +305,14 @@ def evaluate_property(prop_element):
     # Rule: Detached 1-bed — notify only, do NOT bid
     if is_detached_1bed:
         return False, True, "detached 1-bed (ground, >=£600, garden) - notify only", details
+
+    # Rule: 1-bed maisonette — notify only, do NOT bid
+    if is_maisonette_1bed:
+        return False, True, "1-bed maisonette (ground, >=£600, garden) - notify only", details
+
+    # Rule: 1-bed house — notify only, do NOT bid
+    if is_house_1bed:
+        return False, True, "1-bed house (ground, >=£600, garden) - notify only", details
 
     # Other types that pass filters — log but don't bid
     return False, False, f"type '{prop_type}' not in bid list - skip", details
