@@ -34,7 +34,7 @@ telegram:
 
 whatsapp:
   phone: "+447301285414"
-  callmebot_api_key: "YOUR_API_KEY_HERE"
+  callmebot_api_key: "4702401"
 
 schedule:
   interval_minutes: 60
