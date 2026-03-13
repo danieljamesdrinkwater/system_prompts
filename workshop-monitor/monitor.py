@@ -16,6 +16,7 @@ import argparse
 import logging
 import sys
 import time
+from datetime import datetime
 from pathlib import Path
 
 import yaml
@@ -134,16 +135,28 @@ def main():
         return
 
     if args.loop:
-        interval = config.get("schedule", {}).get("interval_minutes", 60)
-        logger.info(f"Starting continuous monitor (every {interval} minutes)")
+        schedule = config.get("schedule", {})
+        interval = schedule.get("interval_minutes", 180)
+        quiet_start = schedule.get("quiet_start", 23)
+        quiet_end = schedule.get("quiet_end", 7)
+        logger.info(f"Starting continuous monitor (every {interval} minutes, quiet {quiet_start}:00-{quiet_end}:00)")
         logger.info(f"Searching within {config['search']['radius_miles']} miles of {config['search']['postcode']}")
         logger.info(f"Price range: £{config['search']['min_price']}-£{config['search']['max_price']}/month")
 
         while True:
-            try:
-                run_check(config, storage, notifier)
-            except Exception as e:
-                logger.error(f"Check failed: {e}")
+            hour = datetime.now().hour
+            if quiet_start > quiet_end:
+                is_quiet = hour >= quiet_start or hour < quiet_end
+            else:
+                is_quiet = quiet_start <= hour < quiet_end
+
+            if is_quiet:
+                logger.info(f"Quiet hours ({quiet_start}:00-{quiet_end}:00) - skipping check")
+            else:
+                try:
+                    run_check(config, storage, notifier)
+                except Exception as e:
+                    logger.error(f"Check failed: {e}")
             logger.info(f"Next check in {interval} minutes...")
             time.sleep(interval * 60)
     else:

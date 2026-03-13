@@ -49,7 +49,9 @@ whatsapp:
   callmebot_api_key: "4702401"
 
 schedule:
-  interval_minutes: 60
+  interval_minutes: 180
+  quiet_start: 23
+  quiet_end: 7
 
 scrapers:
   gumtree:
