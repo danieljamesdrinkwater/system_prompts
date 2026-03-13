@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Telegram bot that lets you chat with Claude (Anthropic API)."""
+"""Telegram bot that lets you chat with an AI via OpenRouter."""
 
 import os
 import logging
@@ -12,13 +12,13 @@ from telegram.ext import (
     ContextTypes,
     filters,
 )
-import anthropic
+from openai import OpenAI
 
 load_dotenv()
 
 TELEGRAM_BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
-ANTHROPIC_API_KEY = os.environ["ANTHROPIC_API_KEY"]
-MODEL = os.getenv("CLAUDE_MODEL", "claude-sonnet-4-20250514")
+OPENROUTER_API_KEY = os.environ["OPENROUTER_API_KEY"]
+MODEL = os.getenv("AI_MODEL", "deepseek/deepseek-r1:free")
 MAX_HISTORY = int(os.getenv("MAX_HISTORY", "20"))
 
 logging.basicConfig(
@@ -27,7 +27,10 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
+client = OpenAI(
+    base_url="https://openrouter.ai/api/v1",
+    api_key=OPENROUTER_API_KEY,
+)
 
 # Per-chat conversation history: {chat_id: [{"role": ..., "content": ...}, ...]}
 conversations: dict[int, list[dict]] = {}
@@ -36,7 +39,7 @@ conversations: dict[int, list[dict]] = {}
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle /start command."""
     await update.message.reply_text(
-        "Hello! I'm a bot powered by Claude. Send me any message and I'll respond.\n\n"
+        "Hello! I'm a bot powered by AI. Send me any message and I'll respond.\n\n"
         "Commands:\n"
         "/new - Start a fresh conversation\n"
         "/model - Show current model\n"
@@ -56,7 +59,7 @@ async def show_model(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Forward user messages to Claude and reply with the response."""
+    """Forward user messages to AI and reply with the response."""
     chat_id = update.effective_chat.id
     user_text = update.message.text
 
@@ -75,24 +78,26 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     await update.message.chat.send_action("typing")
 
     try:
-        response = client.messages.create(
+        response = client.chat.completions.create(
             model=MODEL,
             max_tokens=4096,
             messages=history,
         )
-        assistant_text = response.content[0].text
+        assistant_text = response.choices[0].message.content or ""
+
+        # Strip <think>...</think> blocks from reasoning models
+        import re
+        assistant_text = re.sub(r"<think>.*?</think>", "", assistant_text, flags=re.DOTALL).strip()
+
         history.append({"role": "assistant", "content": assistant_text})
 
         # Telegram has a 4096-char message limit; split if needed
         for i in range(0, len(assistant_text), 4096):
             await update.message.reply_text(assistant_text[i : i + 4096])
 
-    except anthropic.APIError as e:
-        logger.error("Anthropic API error: %s", e)
-        await update.message.reply_text(f"API error: {e.message}")
     except Exception as e:
-        logger.error("Unexpected error: %s", e)
-        await update.message.reply_text("Something went wrong. Please try again.")
+        logger.error("API error: %s", e)
+        await update.message.reply_text(f"API error: {e}")
 
 
 def main() -> None:

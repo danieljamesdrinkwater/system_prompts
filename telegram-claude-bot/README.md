@@ -14,7 +14,7 @@ Chat with Claude through Telegram via [@api_coder_bot](https://t.me/api_coder_bo
    cp .env.example .env
    ```
    - `TELEGRAM_BOT_TOKEN` – from BotFather
-   - `ANTHROPIC_API_KEY` – from console.anthropic.com
+   - `OPENROUTER_API_KEY` – from openrouter.ai
 
 3. Run:
    ```bash
@@ -34,6 +34,6 @@ Chat with Claude through Telegram via [@api_coder_bot](https://t.me/api_coder_bo
 | Variable            | Default                        | Description              |
 |---------------------|--------------------------------|--------------------------|
 | `TELEGRAM_BOT_TOKEN`| *(required)*                   | Telegram bot token       |
-| `ANTHROPIC_API_KEY` | *(required)*                   | Anthropic API key        |
-| `CLAUDE_MODEL`      | `claude-sonnet-4-20250514`     | Claude model to use      |
+| `OPENROUTER_API_KEY` | *(required)*                  | OpenRouter API key       |
+| `AI_MODEL`          | `deepseek/deepseek-r1:free`    | AI model to use          |
 | `MAX_HISTORY`       | `20`                           | Max messages to keep     |
