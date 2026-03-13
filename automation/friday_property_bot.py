@@ -255,6 +255,15 @@ def evaluate_property(prop_element):
             By.CSS_SELECTOR, ".property-garden"
         ).text.strip().lower()
 
+        # Full property description/features text for room and neighbour checks
+        # ADJUST: this selector should capture the description or features list
+        try:
+            description = prop_element.find_element(
+                By.CSS_SELECTOR, ".property-description, .property-features, .property-details"
+            ).text.strip().lower()
+        except NoSuchElementException:
+            description = prop_element.text.strip().lower()
+
     except NoSuchElementException as e:
         logger.warning(f"Could not extract property details: {e}")
         return False, False, "missing data", {}
@@ -275,11 +284,33 @@ def evaluate_property(prop_element):
     is_house_1bed = 'house' in prop_type and '1' in prop_type
     is_sheltered = 'sheltered' in prop_type or 'retirement' in prop_type
 
+    # Check for separate rooms
+    has_sep_bedroom = 'bedroom' in description
+    has_sep_living = 'living' in description or 'lounge' in description or 'sitting room' in description
+    has_sep_kitchen = 'kitchen' in description
+    has_sep_bathroom = 'bathroom' in description or 'bath' in description
+    has_separate_rooms = all([has_sep_bedroom, has_sep_living, has_sep_kitchen, has_sep_bathroom])
+
+    # Check for neighbours above (top floor or no upstairs neighbours)
+    has_neighbours_above = not (
+        'top floor' in description or 'top-floor' in description
+        or 'no neighbo' in description or 'no upstairs' in description
+        or is_ground  # ground floor with no one above is handled by floor_text
+    )
+    # Ground floor flats/maisonettes typically have neighbours above
+    # unless description says otherwise — so for ground floor, check explicitly
+    if is_ground and ('neighbo' in description and 'above' in description):
+        has_neighbours_above = True
+    if is_ground and ('no neighbo' in description or 'no upstairs' in description):
+        has_neighbours_above = False
+
     details = {
         'type': prop_type,
         'floor': floor_text,
         'price': price,
         'garden': garden_text,
+        'separate_rooms': has_separate_rooms,
+        'neighbours_above': has_neighbours_above,
     }
 
     # Rule: Studio/bedsit — never bid
@@ -314,8 +345,15 @@ def evaluate_property(prop_element):
     if is_house_1bed:
         return False, True, "1-bed house (ground, >=£600, garden) - notify only", details
 
-    # Other types that pass filters — log but don't bid
-    return False, False, f"type '{prop_type}' not in bid list - skip", details
+    # Catch-all: any other type that passes ground/price/garden filters
+    # Must also have separate bedroom, living room, kitchen, bathroom
+    # and no neighbours above
+    if not has_separate_rooms:
+        return False, False, f"'{prop_type}' - no separate rooms - skip", details
+    if has_neighbours_above:
+        return False, False, f"'{prop_type}' - neighbours above - skip", details
+
+    return False, True, f"'{prop_type}' (ground, >=£600, garden, sep rooms, no above) - notify", details
 
 # ---------------------------------------------------------------------------
 # Bid placement
