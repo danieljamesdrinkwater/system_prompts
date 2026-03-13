@@ -36,8 +36,8 @@ class Listing:
             # Per annum -> per month
             elif "pa" in price_str or "per annum" in price_str or "per year" in price_str:
                 value /= 12
-            # Heuristic: if value > 1000 and no period specified, likely annual
-            elif value > 1000 and "pcm" not in price_str and "per month" not in price_str:
+            # Heuristic: if value > 1000 and no monthly indicator, likely annual
+            elif value > 1000 and not any(m in price_str for m in ("pcm", "pm", "per month", "/month")):
                 value /= 12
             return value
         return None
@@ -96,10 +96,6 @@ class BaseScraper(ABC):
         return self.min_price <= price <= self.max_price
 
     def filter_listings(self, listings: list[Listing]) -> list[Listing]:
-        """Apply price and keyword filters to listings."""
-        filtered = []
-        for listing in listings:
-            if self.filter_by_price(listing):
-                if listing.matches_keywords(self.keywords) or not self.keywords:
-                    filtered.append(listing)
-        return filtered
+        """Apply price filter. All listings in the right price range are included
+        since cheap commercial units near the target area are likely relevant."""
+        return [l for l in listings if self.filter_by_price(l)]
