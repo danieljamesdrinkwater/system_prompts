@@ -32,6 +32,10 @@ telegram:
   bot_token: "YOUR_BOT_TOKEN_HERE"
   chat_id: "YOUR_CHAT_ID_HERE"
 
+whatsapp:
+  phone: "+447301285414"
+  callmebot_api_key: "YOUR_API_KEY_HERE"
+
 schedule:
   interval_minutes: 60
 

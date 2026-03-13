@@ -8,7 +8,7 @@ Usage:
     python monitor.py              # Run a single check
     python monitor.py --loop       # Run continuously on schedule
     python monitor.py --test       # Dry run - print results, no notifications
-    python monitor.py --test-telegram  # Send a test Telegram message
+    python monitor.py --test-notify    # Send a test message to all configured channels
     python monitor.py --recent     # Show listings found in the last 7 days
 """
 
@@ -22,7 +22,7 @@ import yaml
 
 from scrapers import GumtreeScraper, RightmoveScraper, ZooplaScraper
 from storage import ListingStorage
-from notifier import TelegramNotifier
+from notifier import Notifier
 
 # Configure logging
 logging.basicConfig(
@@ -56,7 +56,7 @@ def get_scrapers(config: dict) -> list:
     return scrapers
 
 
-def run_check(config: dict, storage: ListingStorage, notifier: TelegramNotifier, dry_run: bool = False):
+def run_check(config: dict, storage: ListingStorage, notifier: Notifier, dry_run: bool = False):
     """Run a single check across all scrapers."""
     scrapers = get_scrapers(config)
     total_found = 0
@@ -115,16 +115,16 @@ def main():
     parser = argparse.ArgumentParser(description="Workshop Listing Monitor")
     parser.add_argument("--loop", action="store_true", help="Run continuously on schedule")
     parser.add_argument("--test", action="store_true", help="Dry run - print results only")
-    parser.add_argument("--test-telegram", action="store_true", help="Send test Telegram message")
+    parser.add_argument("--test-notify", action="store_true", help="Send test message to all configured channels")
     parser.add_argument("--recent", action="store_true", help="Show recently found listings")
     parser.add_argument("--config", default="config.yaml", help="Path to config file")
     args = parser.parse_args()
 
     config = load_config(args.config)
     storage = ListingStorage()
-    notifier = TelegramNotifier(config)
+    notifier = Notifier(config)
 
-    if args.test_telegram:
+    if args.test_notify:
         success = notifier.send_test()
         print("Test message sent!" if success else "Failed to send test message.")
         return
