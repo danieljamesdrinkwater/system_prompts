@@ -1,6 +1,6 @@
 # Telegram Claude Bot
 
-Chat with Claude through Telegram via [@homeoptions_bot](https://t.me/homeoptions_bot).
+Chat with Claude through Telegram via [@api_coder_bot](https://t.me/api_coder_bot).
 
 ## Setup
 
