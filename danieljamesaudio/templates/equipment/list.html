@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}Equipment - Daniel James Audio{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0"><i class="bi bi-speaker"></i> Equipment</h4>
+    <div>
+        <a href="{{ url_for('equipment.valuation') }}" class="btn btn-outline-info btn-sm me-2">
+            <i class="bi bi-shield-check"></i> Insurance Valuation
+        </a>
+        <a href="{{ url_for('equipment.add') }}" class="btn btn-primary btn-sm">
+            <i class="bi bi-plus-lg"></i> Add Equipment
+        </a>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-3">
+    <div class="card-body py-2">
+        <form method="GET" class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <input type="text" class="form-control form-control-sm" name="search"
+                       placeholder="Search make, model, serial..." value="{{ search }}">
+            </div>
+            <div class="col-md-2">
+                <select class="form-select form-select-sm" name="status">
+                    <option value="">All Statuses</option>
+                    {% for s in ['available', 'on_hire', 'in_repair', 'retired'] %}
+                    <option value="{{ s }}" {% if current_status == s %}selected{% endif %}>
+                        {{ s|replace('_', ' ')|title }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select form-select-sm" name="category_id">
+                    <option value="">All Categories</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}" {% if current_category == cat.id %}selected{% endif %}>
+                        {{ cat.name }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-funnel"></i> Filter
+                </button>
+                <a href="{{ url_for('equipment.list') }}" class="btn btn-sm btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Equipment Table -->
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead>
+            <tr>
+                <th style="width: 60px;"></th>
+                <th>Make / Model</th>
+                <th>Category</th>
+                <th>Status</th>
+                <th>Condition</th>
+                <th class="text-end">Value</th>
+                <th class="text-end">Day Rate</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr style="cursor: pointer;" onclick="window.location='{{ url_for('equipment.detail', equipment_id=item.id) }}'">
+                <td>
+                    {% if item.primary_photo %}
+                    <img src="{{ url_for('static', filename='../' ~ 'uploads/' ~ item.primary_photo) }}"
+                         class="equipment-photo" alt="{{ item.make }} {{ item.model }}">
+                    {% else %}
+                    <div class="equipment-photo bg-secondary d-flex align-items-center justify-content-center">
+                        <i class="bi bi-speaker text-muted"></i>
+                    </div>
+                    {% endif %}
+                </td>
+                <td>
+                    <strong>{{ item.make }}</strong> {{ item.model }}
+                    {% if item.serial_number %}
+                    <br><small class="text-muted">S/N: {{ item.serial_number }}</small>
+                    {% endif %}
+                </td>
+                <td><small>{{ item.category_name or '-' }}</small></td>
+                <td>
+                    {% set status_colors = {'available': 'success', 'on_hire': 'primary', 'in_repair': 'warning', 'retired': 'secondary'} %}
+                    <span class="badge bg-{{ status_colors.get(item.status, 'secondary') }} status-badge">
+                        {{ item.status|replace('_', ' ') }}
+                    </span>
+                </td>
+                <td>
+                    <span class="condition-{{ item.condition }}">
+                        {{ item.condition|title }}
+                    </span>
+                </td>
+                <td class="text-end">
+                    {% if item.current_value %}
+                    &pound;{{ "%.2f"|format(item.current_value) }}
+                    {% else %}-{% endif %}
+                </td>
+                <td class="text-end">
+                    {% if item.day_rate %}
+                    &pound;{{ "%.2f"|format(item.day_rate) }}
+                    {% else %}-{% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="text-center text-muted py-4">
+                    No equipment found.
+                    <a href="{{ url_for('equipment.add') }}">Add your first item</a>.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="text-muted small">{{ items|length }} item{{ 's' if items|length != 1 }} shown</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Insurance Valuation - Daniel James Audio{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <a href="{{ url_for('equipment.list') }}" class="text-muted text-decoration-none">
+            <i class="bi bi-arrow-left"></i> Equipment
+        </a>
+        <h4 class="mb-0 mt-1"><i class="bi bi-shield-check"></i> Insurance Valuation Report</h4>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body text-center">
+        <small class="text-muted d-block">Total Insured Value</small>
+        <span class="display-5 fw-bold">&pound;{{ "%.2f"|format(total_value) }}</span>
+        <br>
+        <small class="text-muted">{{ total_items }} active items across {{ data|length }} categories</small>
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th class="text-end">Items</th>
+                    <th class="text-end">Purchase Cost</th>
+                    <th class="text-end">Current Value</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in data %}
+                <tr>
+                    <td>{{ row.category_name or 'Uncategorised' }}</td>
+                    <td class="text-end">{{ row.item_count }}</td>
+                    <td class="text-end">&pound;{{ "%.2f"|format(row.total_purchase_price) }}</td>
+                    <td class="text-end"><strong>&pound;{{ "%.2f"|format(row.total_value) }}</strong></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="fw-bold">
+                    <td>Total</td>
+                    <td class="text-end">{{ total_items }}</td>
+                    <td class="text-end">&pound;{{ "%.2f"|format(data|sum(attribute='total_purchase_price')) }}</td>
+                    <td class="text-end">&pound;{{ "%.2f"|format(total_value) }}</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+<div class="text-muted small mt-2">
+    Report generated {{ now().strftime('%d %B %Y') if now is defined else 'today' }}. Excludes retired equipment.
+</div>
+{% endblock %}

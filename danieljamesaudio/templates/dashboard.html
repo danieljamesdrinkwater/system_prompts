@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - Daniel James Audio{% endblock %}
+
+{% block content %}
+<h4 class="mb-3"><i class="bi bi-speedometer2"></i> Dashboard</h4>
+
+<!-- Stats Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+        <div class="card stat-card text-center">
+            <div class="card-body">
+                <div class="display-6 text-primary">{{ stats.get('total', {}).get('count', 0) }}</div>
+                <small class="text-muted">Total Equipment</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card stat-card text-center">
+            <div class="card-body">
+                <div class="display-6 text-success">{{ stats.get('available', {}).get('count', 0) }}</div>
+                <small class="text-muted">Available</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card stat-card text-center">
+            <div class="card-body">
+                <div class="display-6 text-info">{{ stats.get('on_hire', {}).get('count', 0) }}</div>
+                <small class="text-muted">On Hire</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 col-md-3">
+        <div class="card stat-card text-center">
+            <div class="card-body">
+                <div class="display-6 text-warning">{{ stats.get('in_repair', {}).get('count', 0) }}</div>
+                <small class="text-muted">In Repair</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Total Value -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body text-center">
+                <small class="text-muted d-block">Total Inventory Value (Insurance)</small>
+                <span class="display-6 fw-bold">
+                    &pound;{{ "%.2f"|format(stats.get('total', {}).get('total_value', 0)) }}
+                </span>
+                <div class="mt-2">
+                    <a href="{{ url_for('equipment.valuation') }}" class="btn btn-outline-info btn-sm">
+                        <i class="bi bi-shield-check"></i> Full Valuation Report
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body text-center">
+                <small class="text-muted d-block">Quick Actions</small>
+                <div class="d-flex flex-wrap gap-2 justify-content-center mt-2">
+                    <a href="{{ url_for('equipment.add') }}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-plus-lg"></i> Add Equipment
+                    </a>
+                    <a href="{{ url_for('equipment.list') }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="bi bi-list"></i> View All
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Items Needing Attention -->
+{% if needs_attention %}
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-exclamation-triangle text-warning"></i> Equipment In Repair
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead>
+                <tr>
+                    <th>Equipment</th>
+                    <th>Condition</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in needs_attention %}
+                <tr onclick="window.location='{{ url_for('equipment.detail', equipment_id=item.id) }}'" style="cursor: pointer;">
+                    <td><strong>{{ item.make }}</strong> {{ item.model }}</td>
+                    <td><span class="condition-{{ item.condition }}">{{ item.condition|title }}</span></td>
+                    <td class="text-muted">{{ item.notes or '-' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

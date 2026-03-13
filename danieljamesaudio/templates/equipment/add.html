@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+{% block title %}Add Equipment - Daniel James Audio{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <h4 class="mb-3"><i class="bi bi-plus-lg"></i> Add Equipment</h4>
+
+        <!-- Photo Identification -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <h6 class="card-title"><i class="bi bi-camera"></i> Quick Add from Photo</h6>
+                <p class="text-muted small">Take a photo or upload an image and Claude will identify the equipment.</p>
+                <div class="d-flex gap-2">
+                    <div class="camera-btn btn btn-outline-primary">
+                        <i class="bi bi-camera"></i> Take Photo
+                        <input type="file" id="identifyPhoto" accept="image/*" capture="environment">
+                    </div>
+                    <div class="camera-btn btn btn-outline-secondary">
+                        <i class="bi bi-upload"></i> Upload Image
+                        <input type="file" id="identifyUpload" accept="image/*">
+                    </div>
+                </div>
+                <img id="identifyPreview" class="mt-2 equipment-photo-lg" style="display: none;" alt="Preview">
+                <div id="identifyStatus" class="mt-2"></div>
+            </div>
+        </div>
+
+        <!-- Manual Form -->
+        <form method="POST" enctype="multipart/form-data">
+            <div class="card mb-3">
+                <div class="card-header">Basic Details</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="make" class="form-label">Make *</label>
+                            <input type="text" class="form-control" id="make" name="make" required
+                                   placeholder="e.g. Yamaha, QSC, Shure">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="model" class="form-label">Model *</label>
+                            <input type="text" class="form-control" id="model" name="model" required
+                                   placeholder="e.g. MG16, KW153, SM58">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="serial_number" class="form-label">Serial Number</label>
+                            <input type="text" class="form-control" id="serial_number" name="serial_number">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="category_id" class="form-label">Category</label>
+                            <select class="form-select" id="category_id" name="category_id">
+                                <option value="">-- Select --</option>
+                                {% for cat in categories %}
+                                <option value="{{ cat.id }}">{{ cat.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="subcategory" class="form-label">Subcategory</label>
+                            <input type="text" class="form-control" id="subcategory" name="subcategory"
+                                   placeholder="e.g. Active Speaker, Condenser Mic">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="location" class="form-label">Location</label>
+                            <input type="text" class="form-control" id="location" name="location"
+                                   value="warehouse" placeholder="e.g. warehouse, studio, van">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">Financials</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="purchase_date" class="form-label">Purchase Date</label>
+                            <input type="date" class="form-control" id="purchase_date" name="purchase_date">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="purchase_price" class="form-label">Purchase Price (&pound;)</label>
+                            <input type="number" class="form-control" id="purchase_price" name="purchase_price"
+                                   step="0.01" min="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="current_value" class="form-label">Current Value (&pound;)</label>
+                            <input type="number" class="form-control" id="current_value" name="current_value"
+                                   step="0.01" min="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="day_rate" class="form-label">Day Rate (&pound;)</label>
+                            <input type="number" class="form-control" id="day_rate" name="day_rate"
+                                   step="0.01" min="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="week_rate" class="form-label">Week Rate (&pound;)</label>
+                            <input type="number" class="form-control" id="week_rate" name="week_rate"
+                                   step="0.01" min="0">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">Condition & Status</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="condition" class="form-label">Condition</label>
+                            <select class="form-select" id="condition" name="condition">
+                                <option value="excellent">Excellent</option>
+                                <option value="good" selected>Good</option>
+                                <option value="fair">Fair</option>
+                                <option value="poor">Poor</option>
+                                <option value="non-functional">Non-functional</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status" name="status">
+                                <option value="available" selected>Available</option>
+                                <option value="on_hire">On Hire</option>
+                                <option value="in_repair">In Repair</option>
+                                <option value="retired">Retired</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">Photo</div>
+                <div class="card-body">
+                    <div class="d-flex gap-2">
+                        <div class="camera-btn btn btn-outline-primary">
+                            <i class="bi bi-camera"></i> Take Photo
+                            <input type="file" name="photo" accept="image/*" capture="environment"
+                                   onchange="setupPhotoPreview('formPhotoInput', 'formPhotoPreview'); this.id='formPhotoInput';">
+                        </div>
+                        <div class="camera-btn btn btn-outline-secondary">
+                            <i class="bi bi-upload"></i> Upload
+                            <input type="file" name="photo" accept="image/*"
+                                   onchange="this.id='formPhotoInput'; setupPhotoPreview('formPhotoInput', 'formPhotoPreview');">
+                        </div>
+                    </div>
+                    <img id="formPhotoPreview" class="mt-2 equipment-photo-lg" style="display: none;" alt="Preview">
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">Notes</div>
+                <div class="card-body">
+                    <textarea class="form-control" name="notes" rows="3"
+                              placeholder="Any additional notes about this equipment..."></textarea>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mb-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg"></i> Add Equipment
+                </button>
+                <a href="{{ url_for('equipment.list') }}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Photo identification via Claude
+    ['identifyPhoto', 'identifyUpload'].forEach(function(id) {
+        var input = document.getElementById(id);
+        if (!input) return;
+        input.addEventListener('change', function(e) {
+            var file = e.target.files[0];
+            if (!file) return;
+
+            // Show preview
+            var reader = new FileReader();
+            reader.onload = function(ev) {
+                var preview = document.getElementById('identifyPreview');
+                preview.src = ev.target.result;
+                preview.style.display = 'block';
+            };
+            reader.readAsDataURL(file);
+
+            // Send to Claude
+            var status = document.getElementById('identifyStatus');
+            status.innerHTML = '<span class="text-info"><i class="bi bi-hourglass-split"></i> Identifying equipment...</span>';
+
+            var formData = new FormData();
+            formData.append('photo', file);
+
+            fetch('{{ url_for("equipment.identify") }}', {
+                method: 'POST',
+                body: formData
+            })
+            .then(function(r) { return r.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    status.innerHTML = '<span class="text-success"><i class="bi bi-check-circle"></i> Identified! Form pre-filled.</span>';
+                    if (data.make) document.getElementById('make').value = data.make;
+                    if (data.model) document.getElementById('model').value = data.model;
+                    if (data.estimated_value) document.getElementById('current_value').value = data.estimated_value;
+                    if (data.category_suggestion) {
+                        // Try to match category
+                        var sel = document.getElementById('category_id');
+                        for (var i = 0; i < sel.options.length; i++) {
+                            if (sel.options[i].text.toLowerCase().includes(data.category_suggestion.toLowerCase())) {
+                                sel.selectedIndex = i;
+                                break;
+                            }
+                        }
+                    }
+                    if (data.subcategory) document.getElementById('subcategory').value = data.subcategory;
+                } else {
+                    status.innerHTML = '<span class="text-warning"><i class="bi bi-exclamation-triangle"></i> ' + (data.error || 'Could not identify') + '</span>';
+                }
+            })
+            .catch(function(err) {
+                status.innerHTML = '<span class="text-danger"><i class="bi bi-x-circle"></i> Error: ' + err.message + '</span>';
+            });
+        });
+    });
+</script>
+{% endblock %}

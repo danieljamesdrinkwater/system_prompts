@@ -1,0 +1,24 @@
+# Database
+*.db
+
+# Environment
+.env
+
+# Uploads (photos and manuals are local data, not code)
+uploads/photos/*
+uploads/manuals/*
+!uploads/photos/.gitkeep
+!uploads/manuals/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+
+# Obsidian workspace (user-specific, not shared)
+vault/.obsidian/workspace.json
+vault/.obsidian/workspace-mobile.json

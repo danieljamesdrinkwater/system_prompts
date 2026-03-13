@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}Edit {{ item.make }} {{ item.model }} - Daniel James Audio{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8">
+        <a href="{{ url_for('equipment.detail', equipment_id=item.id) }}" class="text-muted text-decoration-none">
+            <i class="bi bi-arrow-left"></i> Back to {{ item.make }} {{ item.model }}
+        </a>
+        <h4 class="mb-3 mt-1"><i class="bi bi-pencil"></i> Edit Equipment</h4>
+
+        <form method="POST" enctype="multipart/form-data">
+            <div class="card mb-3">
+                <div class="card-header">Basic Details</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="make" class="form-label">Make *</label>
+                            <input type="text" class="form-control" id="make" name="make"
+                                   value="{{ item.make }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="model" class="form-label">Model *</label>
+                            <input type="text" class="form-control" id="model" name="model"
+                                   value="{{ item.model }}" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="serial_number" class="form-label">Serial Number</label>
+                            <input type="text" class="form-control" id="serial_number" name="serial_number"
+                                   value="{{ item.serial_number or '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="category_id" class="form-label">Category</label>
+                            <select class="form-select" id="category_id" name="category_id">
+                                <option value="">-- Select --</option>
+                                {% for cat in categories %}
+                                <option value="{{ cat.id }}" {% if item.category_id == cat.id %}selected{% endif %}>
+                                    {{ cat.name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="subcategory" class="form-label">Subcategory</label>
+                            <input type="text" class="form-control" id="subcategory" name="subcategory"
+                                   value="{{ item.subcategory or '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="location" class="form-label">Location</label>
+                            <input type="text" class="form-control" id="location" name="location"
+                                   value="{{ item.location or '' }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">Financials</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="purchase_date" class="form-label">Purchase Date</label>
+                            <input type="date" class="form-control" id="purchase_date" name="purchase_date"
+                                   value="{{ item.purchase_date or '' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="purchase_price" class="form-label">Purchase Price (&pound;)</label>
+                            <input type="number" class="form-control" id="purchase_price" name="purchase_price"
+                                   step="0.01" min="0" value="{{ item.purchase_price or '' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="current_value" class="form-label">Current Value (&pound;)</label>
+                            <input type="number" class="form-control" id="current_value" name="current_value"
+                                   step="0.01" min="0" value="{{ item.current_value or '' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="day_rate" class="form-label">Day Rate (&pound;)</label>
+                            <input type="number" class="form-control" id="day_rate" name="day_rate"
+                                   step="0.01" min="0" value="{{ item.day_rate or '' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="week_rate" class="form-label">Week Rate (&pound;)</label>
+                            <input type="number" class="form-control" id="week_rate" name="week_rate"
+                                   step="0.01" min="0" value="{{ item.week_rate or '' }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">Condition & Status</div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label for="condition" class="form-label">Condition</label>
+                            <select class="form-select" id="condition" name="condition">
+                                {% for c in ['excellent', 'good', 'fair', 'poor', 'non-functional'] %}
+                                <option value="{{ c }}" {% if item.condition == c %}selected{% endif %}>
+                                    {{ c|title }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="status" class="form-label">Status</label>
+                            <select class="form-select" id="status" name="status">
+                                {% for s in ['available', 'on_hire', 'in_repair', 'retired'] %}
+                                <option value="{{ s }}" {% if item.status == s %}selected{% endif %}>
+                                    {{ s|replace('_', ' ')|title }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">Add Photo</div>
+                <div class="card-body">
+                    <div class="camera-btn btn btn-outline-secondary">
+                        <i class="bi bi-camera"></i> Add Photo
+                        <input type="file" name="photo" accept="image/*" capture="environment">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-3">
+                <div class="card-header">Notes</div>
+                <div class="card-body">
+                    <textarea class="form-control" name="notes" rows="3">{{ item.notes or '' }}</textarea>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mb-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg"></i> Save Changes
+                </button>
+                <a href="{{ url_for('equipment.detail', equipment_id=item.id) }}" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
