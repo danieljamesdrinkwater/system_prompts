@@ -54,11 +54,12 @@ TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
 OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
 
 # AI model for page parsing and property evaluation
-AI_MODEL = 'arcee-ai/trinity-large-preview:free'
-# Fallback models if primary is rate-limited
+# Llama 3.3 70B: free tier, no rate limits — most capable free option
+AI_MODEL = 'meta-llama/llama-3.3-70b-instruct:free'
+# Fallback models if primary is unavailable
 AI_FALLBACK_MODELS = [
+    'arcee-ai/trinity-large-preview:free',
     'openrouter/free',
-    'mistralai/mistral-small-3.1-24b-instruct:free',
     'google/gemma-3-27b-it:free',
 ]
 
