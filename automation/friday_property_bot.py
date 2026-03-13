@@ -100,7 +100,7 @@ def send_telegram(message):
 
 
 def create_driver():
-    """Create a headless Chrome WebDriver instance."""
+    """Create a headless Chrome WebDriver instance with anti-detection."""
     options = Options()
     # Remove '--headless=new' for first interactive run to debug selectors
     options.add_argument('--headless=new')
@@ -108,6 +108,14 @@ def create_driver():
     options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--disable-gpu')
     options.add_argument('--window-size=1920,1080')
+    # Anti-detection: prevent sites from blocking automated browsers
+    options.add_argument('--disable-blink-features=AutomationControlled')
+    options.add_argument(
+        'user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) '
+        'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36'
+    )
+    options.add_experimental_option("excludeSwitches", ["enable-automation"])
+    options.add_experimental_option('useAutomationExtension', False)
 
     # Try webdriver-manager first, fall back to system chromedriver
     try:
@@ -116,7 +124,12 @@ def create_driver():
     except Exception:
         service = Service('/opt/node22/bin/chromedriver')
 
-    return webdriver.Chrome(service=service, options=options)
+    driver = webdriver.Chrome(service=service, options=options)
+    # Remove webdriver flag from navigator
+    driver.execute_cdp_cmd('Page.addScriptToEvaluateOnNewDocument', {
+        'source': 'Object.defineProperty(navigator, "webdriver", {get: () => undefined})'
+    })
+    return driver
 
 # ---------------------------------------------------------------------------
 # Login flow
