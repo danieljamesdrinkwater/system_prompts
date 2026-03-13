@@ -48,6 +48,11 @@ whatsapp:
   phone: "+447301285414"
   callmebot_api_key: "4702401"
 
+ai:
+  enabled: true
+  openrouter_api_key: "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"
+  model: "meta-llama/llama-3.3-70b-instruct:free"
+
 schedule:
   interval_minutes: 180
   quiet_start: 23

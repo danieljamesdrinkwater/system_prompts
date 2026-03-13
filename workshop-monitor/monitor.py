@@ -24,6 +24,7 @@ import yaml
 from scrapers import GumtreeScraper, RightmoveScraper, ZooplaScraper
 from storage import ListingStorage
 from notifier import Notifier
+from evaluator import AIEvaluator
 
 # Configure logging
 logging.basicConfig(
@@ -57,7 +58,7 @@ def get_scrapers(config: dict) -> list:
     return scrapers
 
 
-def run_check(config: dict, storage: ListingStorage, notifier: Notifier, dry_run: bool = False):
+def run_check(config: dict, storage: ListingStorage, notifier: Notifier, evaluator: AIEvaluator, dry_run: bool = False):
     """Run a single check across all scrapers."""
     scrapers = get_scrapers(config)
     total_found = 0
@@ -68,20 +69,29 @@ def run_check(config: dict, storage: ListingStorage, notifier: Notifier, dry_run
             listings = scraper.fetch_listings()
             total_found += len(listings)
 
-            for listing in listings:
-                if storage.is_new(listing.id):
-                    new_count += 1
-                    if dry_run:
-                        print(f"\n{'='*60}")
-                        print(f"[NEW] {listing.source}")
-                        print(f"Title: {listing.title}")
-                        print(f"Price: {listing.price}")
-                        print(f"Location: {listing.location}")
-                        print(f"URL: {listing.url}")
-                        print(f"Description: {listing.description[:150]}...")
-                    else:
-                        notifier.send_listing(listing)
-                    storage.mark_seen(listing)
+            # Collect new listings first
+            new_listings = [l for l in listings if storage.is_new(l.id)]
+
+            # Mark all new listings as seen (so rejected ones aren't re-evaluated)
+            for l in new_listings:
+                storage.mark_seen(l)
+
+            # Run AI evaluation on new listings
+            if new_listings:
+                new_listings = evaluator.filter_listings(new_listings)
+
+            for listing in new_listings:
+                new_count += 1
+                if dry_run:
+                    print(f"\n{'='*60}")
+                    print(f"[NEW] {listing.source}")
+                    print(f"Title: {listing.title}")
+                    print(f"Price: {listing.price}")
+                    print(f"Location: {listing.location}")
+                    print(f"URL: {listing.url}")
+                    print(f"Description: {listing.description[:150]}...")
+                else:
+                    notifier.send_listing(listing)
         except Exception as e:
             logger.error(f"Error running {scraper.__class__.__name__}: {e}")
 
@@ -124,6 +134,7 @@ def main():
     config = load_config(args.config)
     storage = ListingStorage()
     notifier = Notifier(config)
+    evaluator = AIEvaluator(config)
 
     if args.test_notify:
         success = notifier.send_test()
@@ -154,14 +165,14 @@ def main():
                 logger.info(f"Quiet hours ({quiet_start}:00-{quiet_end}:00) - skipping check")
             else:
                 try:
-                    run_check(config, storage, notifier)
+                    run_check(config, storage, notifier, evaluator)
                 except Exception as e:
                     logger.error(f"Check failed: {e}")
             logger.info(f"Next check in {interval} minutes...")
             time.sleep(interval * 60)
     else:
         # Single run
-        new = run_check(config, storage, notifier, dry_run=args.test)
+        new = run_check(config, storage, notifier, evaluator, dry_run=args.test)
         if args.test:
             print(f"\n{'='*60}")
             print(f"Dry run complete. {new} new listing(s) found.")
