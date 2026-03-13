@@ -230,7 +230,9 @@ def evaluate_property(prop_element):
     Extract property details and decide whether to bid.
 
     Returns:
-        (should_bid, is_bungalow, reason, details)
+        (should_bid, notify, reason, details)
+        - should_bid: place a bid on this property
+        - notify: send a Telegram notification
 
     NOTE: CSS selectors below are placeholders — update after inspecting
     the actual View Properties page in DevTools.
@@ -293,9 +295,9 @@ def evaluate_property(prop_element):
     if not has_garden:
         return False, False, "no garden - skip", details
 
-    # Rule: Detached 1-bed (passes all filters)
+    # Rule: Detached 1-bed — notify only, do NOT bid
     if is_detached_1bed:
-        return True, False, "detached 1-bed (ground, >=£600, garden) - bid", details
+        return False, True, "detached 1-bed (ground, >=£600, garden) - notify only", details
 
     # Other types that pass filters — log but don't bid
     return False, False, f"type '{prop_type}' not in bid list - skip", details
@@ -365,17 +367,24 @@ def monitor_properties(driver, refresh_count=5, interval_seconds=60):
         logger.info(f"Found {len(properties)} properties")
 
         for prop in properties:
-            should_bid, is_bungalow, reason, details = evaluate_property(prop)
+            should_bid, notify, reason, details = evaluate_property(prop)
             logger.info(f"  Property: {details} -> {reason}")
 
             if should_bid:
                 success = place_bid(driver, prop)
-                if success and is_bungalow:
+                if success and notify:
                     send_telegram(
                         f"BID PLACED on bungalow! "
                         f"Price: £{details.get('price', 'N/A')}, "
                         f"Type: {details.get('type', 'N/A')}"
                     )
+            elif notify:
+                send_telegram(
+                    f"Property found (no bid): "
+                    f"Type: {details.get('type', 'N/A')}, "
+                    f"Price: £{details.get('price', 'N/A')}, "
+                    f"Floor: {details.get('floor', 'N/A')}"
+                )
 
         if i < refresh_count - 1:
             time.sleep(interval_seconds)
