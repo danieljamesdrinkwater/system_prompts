@@ -1,6 +1,6 @@
 search:
   postcode: "IG9 5QZ"
-  radius_miles: 20
+  radius_miles: 10
   min_price: 0
   max_price: 350
   keywords:
@@ -44,17 +44,17 @@ scrapers:
     enabled: true
     search_urls:
       # General commercial - low max_price since many listings are per-week
-      - "https://www.gumtree.com/search?search_category=commercial-property-to-rent&search_location=Essex&max_price=350&distance=20"
-      - "https://www.gumtree.com/search?search_category=commercial-property-to-rent&search_location=Hertfordshire&max_price=350&distance=20"
+      - "https://www.gumtree.com/search?search_category=commercial-property-to-rent&search_location=Essex&max_price=350&distance=10"
+      - "https://www.gumtree.com/search?search_category=commercial-property-to-rent&search_location=Hertfordshire&max_price=350&distance=10"
       # Keyword-targeted searches for workshops/units specifically
-      - "https://www.gumtree.com/search?q=workshop+unit&search_location=Essex&max_price=350&distance=20"
-      - "https://www.gumtree.com/search?q=lock+up+garage+unit&search_location=Essex&max_price=350&distance=20"
-      - "https://www.gumtree.com/search?q=storage+unit+rent&search_location=Essex&max_price=350&distance=20"
+      - "https://www.gumtree.com/search?q=workshop+unit&search_location=Essex&max_price=350&distance=10"
+      - "https://www.gumtree.com/search?q=lock+up+garage+unit&search_location=Essex&max_price=350&distance=10"
+      - "https://www.gumtree.com/search?q=storage+unit+rent&search_location=Essex&max_price=350&distance=10"
   rightmove:
     enabled: true
     search_urls:
-      - "https://www.rightmove.co.uk/commercial-property-to-let/find.html?searchLocation=IG9+5QZ&radius=20.0&maxPrice=350&maxDaysSinceAdded=3&includeLetAgreed=false"
+      - "https://www.rightmove.co.uk/commercial-property-to-let/find.html?searchLocation=IG9+5QZ&radius=10.0&maxPrice=350&maxDaysSinceAdded=3&includeLetAgreed=false"
   zoopla:
     enabled: false
     search_urls:
-      - "https://www.zoopla.co.uk/to-rent/commercial/details/essex/?price_max=350&category=commercial&section=to-rent&q=IG9+5QZ&radius=20"
+      - "https://www.zoopla.co.uk/to-rent/commercial/details/essex/?price_max=350&category=commercial&section=to-rent&q=IG9+5QZ&radius=10"
