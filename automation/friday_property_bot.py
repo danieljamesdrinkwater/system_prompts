@@ -6,16 +6,21 @@ Runs every Friday at 8:57 AM via cron. Logs into homeoption.org,
 navigates to View Properties at 9:00 AM, monitors for 5 minutes,
 and auto-bids on qualifying properties.
 
+Uses OpenRouter AI (Arcee Trinity) to intelligently parse page HTML
+and evaluate properties — no fragile CSS selectors needed.
+
 Bidding rules:
   - Bungalow: ALWAYS bid + send Telegram notification
   - Studio/bedsit: NEVER bid
-  - Detached 1-bed: Bid if ground floor, >= £600, has garden
-  - Any other: Skip unless ground floor, >= £600, has garden
+  - Sheltered/retirement: NEVER bid
   - NOT ground floor: skip
   - Price < £600: skip
   - No garden: skip
+  - Detached 1-bed, 1-bed maisonette, 1-bed house: Telegram notify only
+  - Any other matching criteria (sep rooms, no neighbours above): notify only
 """
 
+import json
 import os
 import sys
 import time
@@ -46,6 +51,16 @@ EMAIL = os.getenv('HOMEOPTION_EMAIL')
 PASSWORD = os.getenv('HOMEOPTION_PASSWORD')
 TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
 TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
+OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
+
+# AI model for page parsing and property evaluation
+AI_MODEL = 'arcee-ai/trinity-large-preview:free'
+# Fallback models if primary is rate-limited
+AI_FALLBACK_MODELS = [
+    'openrouter/free',
+    'mistralai/mistral-small-3.1-24b-instruct:free',
+    'google/gemma-3-27b-it:free',
+]
 
 BASE_URL = 'https://www.homeoption.org'
 
@@ -69,7 +84,118 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# Telegram notification via CallMeBot
+# OpenRouter AI
+# ---------------------------------------------------------------------------
+
+PROPERTY_EVAL_PROMPT = """You are a property listing analyzer for a housing automation bot.
+
+Given the HTML of a property listing page, extract ALL properties and for EACH one return a JSON object with:
+- type: property type (e.g. "bungalow", "flat", "house", "maisonette", "studio", "bedsit", "detached", "sheltered")
+- bedrooms: number of bedrooms (integer)
+- floor: which floor (e.g. "ground floor", "first floor")
+- price: weekly rent as a number (no currency symbol)
+- has_garden: true/false
+- has_separate_bedroom: true/false
+- has_separate_living_room: true/false
+- has_separate_kitchen: true/false
+- has_separate_bathroom: true/false
+- has_neighbours_above: true/false (false if bungalow, top floor, or explicitly stated)
+- address: address if available
+- should_bid: true/false based on these STRICT rules:
+  * Bungalow: ALWAYS true (overrides all other rules)
+  * Studio/bedsit: ALWAYS false
+  * Sheltered/retirement: ALWAYS false
+  * NOT ground floor: false
+  * Price less than 600: false
+  * No garden: false
+  * Everything else: false (notify only)
+- should_notify: true/false — send Telegram if:
+  * Bungalow: true (always)
+  * Detached 1-bed (ground floor, >= £600, garden): true
+  * 1-bed maisonette (ground floor, >= £600, garden): true
+  * 1-bed house (ground floor, >= £600, garden): true
+  * Any other type that is ground floor, >= £600, has garden, has separate bedroom+living room+kitchen+bathroom, and NO neighbours above: true
+  * Otherwise: false
+- reason: brief explanation of the decision
+
+Return a JSON array of objects. If no properties found, return an empty array [].
+Reply with ONLY valid JSON, no markdown code fences, no explanation."""
+
+PAGE_PARSE_PROMPT = """You are a web page analyzer. Given the HTML of a login/navigation page, identify:
+- login_form: CSS selector or XPath for the login form
+- email_field: CSS selector for email/username input
+- password_field: CSS selector for password input
+- submit_button: CSS selector for login/submit button
+- partner_dropdown: CSS selector for housing provider/partner dropdown (if exists)
+- efdc_option: how to select EFDC (visible text or value)
+- view_properties_link: CSS selector or text for "View Properties" link
+- any_navigation: list of main navigation links with text and selectors
+
+Return ONLY valid JSON, no markdown code fences."""
+
+
+def ai_query(prompt, html_content, model=None):
+    """Send a query to OpenRouter AI with HTML content."""
+    if not OPENROUTER_API_KEY:
+        logger.error("OPENROUTER_API_KEY missing in .env")
+        return None
+
+    models_to_try = [model or AI_MODEL] + AI_FALLBACK_MODELS
+
+    for m in models_to_try:
+        try:
+            resp = requests.post(
+                'https://openrouter.ai/api/v1/chat/completions',
+                headers={
+                    'Authorization': f'Bearer {OPENROUTER_API_KEY}',
+                    'Content-Type': 'application/json',
+                },
+                json={
+                    'model': m,
+                    'messages': [
+                        {'role': 'user', 'content': f"{prompt}\n\nHTML:\n{html_content[:15000]}"}
+                    ],
+                    'max_tokens': 2000,
+                },
+                timeout=60
+            )
+            data = resp.json()
+            if 'choices' in data:
+                content = data['choices'][0]['message'].get('content', '')
+                if content:
+                    logger.info(f"AI response from {m} ({len(content)} chars)")
+                    return content
+                logger.warning(f"Empty response from {m}, trying next...")
+            else:
+                err = data.get('error', {}).get('message', 'unknown')
+                logger.warning(f"AI error from {m}: {err}, trying next...")
+        except Exception as e:
+            logger.warning(f"AI request to {m} failed: {e}, trying next...")
+
+    logger.error("All AI models failed")
+    return None
+
+
+def parse_ai_json(response):
+    """Parse JSON from AI response, handling markdown fences."""
+    if not response:
+        return None
+    cleaned = response.strip()
+    # Strip markdown code fences
+    if cleaned.startswith('```'):
+        cleaned = cleaned.split('\n', 1)[-1]
+    if cleaned.endswith('```'):
+        cleaned = cleaned.rsplit('```', 1)[0]
+    cleaned = cleaned.strip()
+    try:
+        return json.loads(cleaned)
+    except json.JSONDecodeError as e:
+        logger.warning(f"Failed to parse AI JSON: {e}")
+        logger.debug(f"Raw response: {response[:500]}")
+        return None
+
+# ---------------------------------------------------------------------------
+# Telegram notification
 # ---------------------------------------------------------------------------
 
 
@@ -102,7 +228,7 @@ def send_telegram(message):
 def create_driver():
     """Create a headless Chrome WebDriver instance with anti-detection."""
     options = Options()
-    # Remove '--headless=new' for first interactive run to debug selectors
+    # Remove '--headless=new' for first interactive run to debug visually
     options.add_argument('--headless=new')
     options.add_argument('--no-sandbox')
     options.add_argument('--disable-dev-shm-usage')
@@ -132,89 +258,144 @@ def create_driver():
     return driver
 
 # ---------------------------------------------------------------------------
-# Login flow
+# AI-powered login flow
 # ---------------------------------------------------------------------------
 
 
 def login(driver):
-    """Navigate to homeoption.org, select EFDC, and log in."""
+    """Navigate to homeoption.org, select EFDC, and log in.
+
+    Uses AI to parse the page HTML and find the correct selectors,
+    with hardcoded fallbacks for common patterns.
+    """
     logger.info("Navigating to homeoption.org")
     driver.get(BASE_URL)
+    time.sleep(5)  # Let JS render
 
     wait = WebDriverWait(driver, 15)
+    page_html = driver.page_source
 
-    # NOTE: All selectors below are best-guesses for HomeOption's portal.
-    # They MUST be verified by inspecting the live site with browser DevTools.
-    # Run the script once with '--headless=new' REMOVED to confirm visually.
+    # Ask AI to identify page elements
+    selectors = None
+    if OPENROUTER_API_KEY:
+        logger.info("Using AI to parse login page...")
+        ai_response = ai_query(PAGE_PARSE_PROMPT, page_html)
+        selectors = parse_ai_json(ai_response)
+        if selectors:
+            logger.info(f"AI identified selectors: {json.dumps(selectors, indent=2)}")
 
-    # Step 1: Click "Home Option" in the navigation  # ADJUST selector
+    # Step 1: Click "Home Option" in the navigation
     try:
-        home_option_link = wait.until(
-            EC.element_to_be_clickable((By.LINK_TEXT, "Home Option"))
-        )
-        home_option_link.click()
-        logger.info("Clicked 'Home Option' nav link")
-    except TimeoutException:
-        # Try partial match or CSS selector
-        home_option_link = wait.until(
-            EC.element_to_be_clickable(
+        if selectors and selectors.get('any_navigation'):
+            # Try AI-suggested navigation
+            for nav in selectors['any_navigation']:
+                if 'home option' in nav.get('text', '').lower():
+                    el = driver.find_element(By.CSS_SELECTOR, nav['selector'])
+                    el.click()
+                    logger.info("Clicked 'Home Option' via AI selector")
+                    break
+            else:
+                raise NoSuchElementException("AI nav not found")
+        else:
+            raise NoSuchElementException("No AI selectors")
+    except (NoSuchElementException, KeyError, TypeError):
+        # Fallback: try common patterns
+        try:
+            link = wait.until(EC.element_to_be_clickable((By.LINK_TEXT, "Home Option")))
+            link.click()
+            logger.info("Clicked 'Home Option' via link text")
+        except TimeoutException:
+            link = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, "//a[contains(text(), 'Home Option')]")
-            )
-        )
-        home_option_link.click()
-        logger.info("Clicked 'Home Option' via XPath")
+            ))
+            link.click()
+            logger.info("Clicked 'Home Option' via XPath")
 
-    # Step 2: Select EFDC as housing provider via 'partner' dropdown  # ADJUST
+    time.sleep(2)
+
+    # Step 2: Select EFDC as housing provider
     try:
-        provider_dropdown = wait.until(
-            EC.presence_of_element_located((By.ID, "partner"))
-            # Fallback IDs to try: (By.NAME, "partner"),
-            # (By.CSS_SELECTOR, "select[name='partner']"),
-            # (By.CSS_SELECTOR, ".housing-provider-select")
-        )
-        select = Select(provider_dropdown)
-        select.select_by_visible_text("EFDC")
-        logger.info("Selected EFDC from partner dropdown")
-    except (NoSuchElementException, TimeoutException):
-        # EFDC might be a clickable link/button instead of dropdown
-        efdc_link = wait.until(
-            EC.element_to_be_clickable(
+        if selectors and selectors.get('partner_dropdown'):
+            dropdown = driver.find_element(By.CSS_SELECTOR, selectors['partner_dropdown'])
+            select = Select(dropdown)
+            efdc_text = selectors.get('efdc_option', 'EFDC')
+            select.select_by_visible_text(efdc_text)
+            logger.info(f"Selected '{efdc_text}' via AI selector")
+        else:
+            raise NoSuchElementException("No AI dropdown selector")
+    except (NoSuchElementException, KeyError, TypeError):
+        try:
+            dropdown = wait.until(EC.presence_of_element_located((By.ID, "partner")))
+            Select(dropdown).select_by_visible_text("EFDC")
+            logger.info("Selected EFDC from #partner dropdown")
+        except (NoSuchElementException, TimeoutException):
+            efdc = wait.until(EC.element_to_be_clickable(
                 (By.XPATH, "//*[contains(text(), 'EFDC')]")
-            )
-        )
-        efdc_link.click()
-        logger.info("Clicked EFDC link/button")
+            ))
+            efdc.click()
+            logger.info("Clicked EFDC link/button")
 
-    # Step 3: Enter credentials  # ADJUST selectors
-    email_field = wait.until(
-        EC.presence_of_element_located((By.ID, "email"))
-        # Fallback: (By.NAME, "email"), (By.CSS_SELECTOR, "input[type='email']")
-    )
-    email_field.clear()
-    email_field.send_keys(EMAIL)
+    time.sleep(2)
 
-    password_field = driver.find_element(By.ID, "password")
-    # Fallback: (By.NAME, "password"), (By.CSS_SELECTOR, "input[type='password']")
-    password_field.clear()
-    password_field.send_keys(PASSWORD)
+    # Step 3: Enter credentials
+    try:
+        if selectors and selectors.get('email_field'):
+            email_el = driver.find_element(By.CSS_SELECTOR, selectors['email_field'])
+        else:
+            raise NoSuchElementException("No AI email selector")
+    except (NoSuchElementException, KeyError, TypeError):
+        try:
+            email_el = wait.until(EC.presence_of_element_located((By.ID, "email")))
+        except TimeoutException:
+            email_el = wait.until(EC.presence_of_element_located(
+                (By.CSS_SELECTOR, "input[type='email'], input[name='email']")
+            ))
+    email_el.clear()
+    email_el.send_keys(EMAIL)
 
-    # Step 4: Submit login  # ADJUST selector
-    login_button = driver.find_element(
-        By.CSS_SELECTOR, "button[type='submit']"
-        # Fallback: (By.XPATH, "//button[contains(text(), 'Log')]")
-    )
-    login_button.click()
+    try:
+        if selectors and selectors.get('password_field'):
+            pass_el = driver.find_element(By.CSS_SELECTOR, selectors['password_field'])
+        else:
+            raise NoSuchElementException("No AI password selector")
+    except (NoSuchElementException, KeyError, TypeError):
+        try:
+            pass_el = driver.find_element(By.ID, "password")
+        except NoSuchElementException:
+            pass_el = driver.find_element(By.CSS_SELECTOR, "input[type='password']")
+    pass_el.clear()
+    pass_el.send_keys(PASSWORD)
+
+    # Step 4: Submit login
+    try:
+        if selectors and selectors.get('submit_button'):
+            btn = driver.find_element(By.CSS_SELECTOR, selectors['submit_button'])
+        else:
+            raise NoSuchElementException("No AI submit selector")
+    except (NoSuchElementException, KeyError, TypeError):
+        try:
+            btn = driver.find_element(By.CSS_SELECTOR, "button[type='submit']")
+        except NoSuchElementException:
+            btn = driver.find_element(By.XPATH, "//button[contains(text(), 'Log')]")
+    btn.click()
     logger.info("Login submitted")
 
-    # Wait for page to load after login
     time.sleep(3)
 
-    # Step 5: Click "View Properties"  # ADJUST selector
-    view_props = wait.until(
-        EC.element_to_be_clickable((By.LINK_TEXT, "View Properties"))
-        # Fallback: (By.PARTIAL_LINK_TEXT, "View Propert")
-    )
-    view_props.click()
+    # Step 5: Click "View Properties"
+    try:
+        if selectors and selectors.get('view_properties_link'):
+            vp = driver.find_element(By.CSS_SELECTOR, selectors['view_properties_link'])
+        else:
+            raise NoSuchElementException("No AI view properties selector")
+    except (NoSuchElementException, KeyError, TypeError):
+        try:
+            vp = wait.until(EC.element_to_be_clickable((By.LINK_TEXT, "View Properties")))
+        except TimeoutException:
+            vp = wait.until(EC.element_to_be_clickable(
+                (By.PARTIAL_LINK_TEXT, "View Propert")
+            ))
+    vp.click()
     logger.info("Navigated to View Properties page")
 
 # ---------------------------------------------------------------------------
@@ -234,171 +415,59 @@ def wait_until_nine():
         logger.info("Already past 09:00, proceeding immediately")
 
 # ---------------------------------------------------------------------------
-# Property evaluation
+# AI-powered property evaluation
 # ---------------------------------------------------------------------------
 
 
-def evaluate_property(prop_element):
+def evaluate_properties_with_ai(page_html):
+    """Use AI to extract and evaluate all properties from the page HTML.
+
+    Returns a list of property dicts, each with should_bid, should_notify, etc.
+    Falls back to empty list if AI fails.
     """
-    Extract property details and decide whether to bid.
+    logger.info("Sending page HTML to AI for property evaluation...")
+    ai_response = ai_query(PROPERTY_EVAL_PROMPT, page_html)
+    properties = parse_ai_json(ai_response)
 
-    Returns:
-        (should_bid, notify, reason, details)
-        - should_bid: place a bid on this property
-        - notify: send a Telegram notification
+    if properties is None:
+        logger.warning("AI returned no valid JSON — no properties to process")
+        return []
 
-    NOTE: CSS selectors below are placeholders — update after inspecting
-    the actual View Properties page in DevTools.
-    """
-    try:
-        # ADJUST all these selectors after first interactive run
-        prop_type = prop_element.find_element(
-            By.CSS_SELECTOR, ".property-type"
-        ).text.strip().lower()
+    if not isinstance(properties, list):
+        # AI might return a single object instead of array
+        properties = [properties]
 
-        floor_text = prop_element.find_element(
-            By.CSS_SELECTOR, ".property-floor"
-        ).text.strip().lower()
+    logger.info(f"AI identified {len(properties)} properties")
+    return properties
 
-        price_text = prop_element.find_element(
-            By.CSS_SELECTOR, ".property-price"
-        ).text.strip()
 
-        garden_text = prop_element.find_element(
-            By.CSS_SELECTOR, ".property-garden"
-        ).text.strip().lower()
-
-        # Full property description/features text for room and neighbour checks
-        # ADJUST: this selector should capture the description or features list
+def find_bid_button(driver):
+    """Try to find and return a bid/place bid button on the page."""
+    selectors = [
+        "button[class*='bid']", "a[class*='bid']",
+        "button[class*='Bid']", "a[class*='Bid']",
+        ".bid-button", ".place-bid",
+    ]
+    for sel in selectors:
         try:
-            description = prop_element.find_element(
-                By.CSS_SELECTOR, ".property-description, .property-features, .property-details"
-            ).text.strip().lower()
+            return driver.find_element(By.CSS_SELECTOR, sel)
         except NoSuchElementException:
-            description = prop_element.text.strip().lower()
+            continue
 
-    except NoSuchElementException as e:
-        logger.warning(f"Could not extract property details: {e}")
-        return False, False, "missing data", {}
-
-    # Parse price
-    price = 0.0
-    try:
-        price = float(''.join(c for c in price_text if c.isdigit() or c == '.'))
-    except ValueError:
-        logger.warning(f"Could not parse price: {price_text}")
-
-    has_garden = 'yes' in garden_text or 'garden' in garden_text
-    is_ground = 'ground' in floor_text
-    is_bungalow = 'bungalow' in prop_type
-    is_studio = 'studio' in prop_type or 'bedsit' in prop_type
-    is_detached_1bed = 'detached' in prop_type and '1' in prop_type
-    is_maisonette_1bed = 'maisonette' in prop_type and '1' in prop_type
-    is_house_1bed = 'house' in prop_type and '1' in prop_type
-    is_sheltered = 'sheltered' in prop_type or 'retirement' in prop_type
-
-    # Check for separate rooms
-    has_sep_bedroom = 'bedroom' in description
-    has_sep_living = 'living' in description or 'lounge' in description or 'sitting room' in description
-    has_sep_kitchen = 'kitchen' in description
-    has_sep_bathroom = 'bathroom' in description or 'bath' in description
-    has_separate_rooms = all([has_sep_bedroom, has_sep_living, has_sep_kitchen, has_sep_bathroom])
-
-    # Check for neighbours above (top floor or no upstairs neighbours)
-    has_neighbours_above = not (
-        'top floor' in description or 'top-floor' in description
-        or 'no neighbo' in description or 'no upstairs' in description
-        or is_ground  # ground floor with no one above is handled by floor_text
-    )
-    # Ground floor flats/maisonettes typically have neighbours above
-    # unless description says otherwise — so for ground floor, check explicitly
-    if is_ground and ('neighbo' in description and 'above' in description):
-        has_neighbours_above = True
-    if is_ground and ('no neighbo' in description or 'no upstairs' in description):
-        has_neighbours_above = False
-
-    details = {
-        'type': prop_type,
-        'floor': floor_text,
-        'price': price,
-        'garden': garden_text,
-        'separate_rooms': has_separate_rooms,
-        'neighbours_above': has_neighbours_above,
-    }
-
-    # Rule: Studio/bedsit — never bid
-    if is_studio:
-        return False, False, "studio/bedsit - skip", details
-
-    # Rule: Sheltered/retirement — never bid
-    if is_sheltered:
-        return False, False, "sheltered/retirement - skip", details
-
-    # Rule: Bungalow — always bid (no floor/price/garden filter)
-    if is_bungalow:
-        return True, True, "bungalow - bid immediately", details
-
-    # General exclusion rules
-    if not is_ground:
-        return False, False, "not ground floor - skip", details
-    if price < 600:
-        return False, False, f"price £{price:.0f} < £600 - skip", details
-    if not has_garden:
-        return False, False, "no garden - skip", details
-
-    # Rule: Detached 1-bed — notify only, do NOT bid
-    if is_detached_1bed:
-        return False, True, "detached 1-bed (ground, >=£600, garden) - notify only", details
-
-    # Rule: 1-bed maisonette — notify only, do NOT bid
-    if is_maisonette_1bed:
-        return False, True, "1-bed maisonette (ground, >=£600, garden) - notify only", details
-
-    # Rule: 1-bed house — notify only, do NOT bid
-    if is_house_1bed:
-        return False, True, "1-bed house (ground, >=£600, garden) - notify only", details
-
-    # Catch-all: any other type that passes ground/price/garden filters
-    # Must also have separate bedroom, living room, kitchen, bathroom
-    # and no neighbours above
-    if not has_separate_rooms:
-        return False, False, f"'{prop_type}' - no separate rooms - skip", details
-    if has_neighbours_above:
-        return False, False, f"'{prop_type}' - neighbours above - skip", details
-
-    return False, True, f"'{prop_type}' (ground, >=£600, garden, sep rooms, no above) - notify", details
-
-# ---------------------------------------------------------------------------
-# Bid placement
-# ---------------------------------------------------------------------------
-
-
-def place_bid(driver, prop_element):
-    """Click the bid button on a property listing."""
-    try:
-        # ADJUST: inspect the actual bid button selector
-        bid_button = prop_element.find_element(
-            By.CSS_SELECTOR, ".bid-button, button[class*='bid'], a[class*='bid']"
-        )
-        bid_button.click()
-        logger.info("Bid button clicked")
-
-        # Handle optional confirmation dialog
+    # Try by text content
+    xpaths = [
+        "//button[contains(text(), 'Bid')]",
+        "//button[contains(text(), 'bid')]",
+        "//a[contains(text(), 'Bid')]",
+        "//button[contains(text(), 'Place')]",
+    ]
+    for xp in xpaths:
         try:
-            confirm = WebDriverWait(driver, 5).until(
-                EC.element_to_be_clickable(
-                    (By.XPATH, "//button[contains(text(), 'Confirm')]")
-                )
-            )
-            confirm.click()
-            logger.info("Bid confirmed")
-        except TimeoutException:
-            pass  # No confirmation dialog
+            return driver.find_element(By.XPATH, xp)
+        except NoSuchElementException:
+            continue
 
-        return True
-    except Exception as e:
-        logger.error(f"Failed to place bid: {e}")
-        return False
+    return None
 
 # ---------------------------------------------------------------------------
 # Main monitoring loop
@@ -406,50 +475,69 @@ def place_bid(driver, prop_element):
 
 
 def monitor_properties(driver, refresh_count=5, interval_seconds=60):
-    """Refresh View Properties page and evaluate listings."""
+    """Refresh View Properties page and use AI to evaluate listings."""
     for i in range(refresh_count):
         logger.info(f"--- Refresh {i + 1}/{refresh_count} ---")
         driver.refresh()
-        time.sleep(3)  # Let page load
+        time.sleep(5)  # Let JS render
 
-        # ADJUST: use the actual property card container selector
-        try:
-            WebDriverWait(driver, 10).until(
-                EC.presence_of_element_located(
-                    (By.CSS_SELECTOR,
-                     ".property-card, .property-listing, .property-item")
-                )
-            )
-        except TimeoutException:
-            logger.info("No property cards found on this refresh")
+        page_html = driver.page_source
+
+        # Use AI to parse and evaluate all properties
+        properties = evaluate_properties_with_ai(page_html)
+
+        if not properties:
+            logger.info("No properties found on this refresh")
             if i < refresh_count - 1:
                 time.sleep(interval_seconds)
             continue
 
-        properties = driver.find_elements(
-            By.CSS_SELECTOR,
-            ".property-card, .property-listing, .property-item"
-        )
-        logger.info(f"Found {len(properties)} properties")
-
         for prop in properties:
-            should_bid, notify, reason, details = evaluate_property(prop)
-            logger.info(f"  Property: {details} -> {reason}")
+            should_bid = prop.get('should_bid', False)
+            should_notify = prop.get('should_notify', False)
+            reason = prop.get('reason', 'no reason given')
+            prop_type = prop.get('type', 'unknown')
+            price = prop.get('price', 'N/A')
+            address = prop.get('address', 'N/A')
+
+            logger.info(f"  Property: {prop_type}, £{price}, {address} -> {reason}")
 
             if should_bid:
-                success = place_bid(driver, prop)
-                if success and notify:
+                logger.info("  Attempting to place bid...")
+                bid_btn = find_bid_button(driver)
+                if bid_btn:
+                    bid_btn.click()
+                    logger.info("  Bid button clicked")
+                    # Handle confirmation dialog
+                    try:
+                        confirm = WebDriverWait(driver, 5).until(
+                            EC.element_to_be_clickable(
+                                (By.XPATH, "//button[contains(text(), 'Confirm')]")
+                            )
+                        )
+                        confirm.click()
+                        logger.info("  Bid confirmed")
+                    except TimeoutException:
+                        pass
+                else:
+                    logger.warning("  Could not find bid button!")
+
+                if should_notify:
                     send_telegram(
-                        f"BID PLACED on bungalow! "
-                        f"Price: £{details.get('price', 'N/A')}, "
-                        f"Type: {details.get('type', 'N/A')}"
+                        f"BID PLACED!\n"
+                        f"Type: {prop_type}\n"
+                        f"Price: £{price}\n"
+                        f"Address: {address}\n"
+                        f"Reason: {reason}"
                     )
-            elif notify:
+
+            elif should_notify:
                 send_telegram(
-                    f"Property found (no bid): "
-                    f"Type: {details.get('type', 'N/A')}, "
-                    f"Price: £{details.get('price', 'N/A')}, "
-                    f"Floor: {details.get('floor', 'N/A')}"
+                    f"Property found (no bid):\n"
+                    f"Type: {prop_type}\n"
+                    f"Price: £{price}\n"
+                    f"Address: {address}\n"
+                    f"Reason: {reason}"
                 )
 
         if i < refresh_count - 1:
@@ -460,6 +548,9 @@ def main():
     if not EMAIL or not PASSWORD:
         logger.error("Missing HOMEOPTION_EMAIL or HOMEOPTION_PASSWORD in .env")
         sys.exit(1)
+
+    if not OPENROUTER_API_KEY:
+        logger.warning("OPENROUTER_API_KEY not set — AI features disabled, using fallback selectors")
 
     driver = None
     try:
