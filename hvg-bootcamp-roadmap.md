@@ -276,6 +276,39 @@ Walk around truck. Pull each magnetic device off, press power button to sleep. P
 
 > Compare: a commercial Mobileye Shield+ is £2,000-4,000, permanently fitted to one truck, and you don't own it. This system costs less, is fully portable, and you carry it between jobs.
 
+### Simulation & Testing — CARLA (Free, Open Source)
+
+Before mounting anything on a real truck, build and test the entire detection pipeline in [CARLA](https://carla.org/) — a free, open-source autonomous driving simulator (MIT licence). Runs on Linux. Built on Unreal Engine 4.
+
+**What CARLA gives you:**
+- Simulated cameras, LiDAR, radar — position them on a virtual truck exactly matching the real sensor placement
+- Pedestrians and cyclists with realistic AI behaviour (crossing roads, cycling alongside)
+- Weather simulation — rain, fog, night, dawn. Test all conditions
+- Scriptable scenarios — define "cyclist in left blind spot during left turn" and replay it 1,000 times
+- Automatic ground truth labels — every pedestrian/cyclist is tagged. Free training data for custom YOLOv8 model
+- Steering angle, speed, acceleration data from the virtual truck — test OBD-II alert logic without a real truck
+- ROS bridge for full ADAS pipeline integration
+- Record and replay — compare different sensor configs or alert thresholds
+
+**Development workflow:**
+1. Mount virtual cameras + radar pods on a CARLA truck in the same positions as the real design
+2. Script dangerous scenarios: left turn with cyclist, pedestrian stepping off kerb, reversing toward obstacle
+3. Feed simulated camera streams into YOLOv8 pipeline — tune detection thresholds
+4. Feed simulated radar data into alert logic — tune distance/speed escalation
+5. Test OBD-II integration (steering angle + speed → alert escalation) using CARLA vehicle telemetry
+6. Generate synthetic training data with automatic labels — fine-tune YOLOv8 on truck blind spot viewpoints
+7. Train custom model on CARLA synthetic data + real-world datasets (VisDrone, KITTI, BDD100K)
+8. Export trained model to Hailo HEF format, deploy to Pi/Jetson
+9. Only then mount on a real parked truck and walk around it to validate
+
+**Why custom ML training matters:**
+- Pre-trained YOLOv8 detects "person" and "bicycle" but was trained on general photos, not side-mounted truck cameras at steep downward angles
+- Cyclists seen from a left-side cab camera are foreshortened, partially occluded by wheel arches, at unusual angles — generic models miss these
+- Fine-tuning on CARLA synthetic data from the exact camera angles you'll use can push pedestrian recall from ~70% to 96%+
+- CARLA generates unlimited free labelled training data — no manual annotation needed
+
+**Install:** `apt` or Docker on Ubuntu. GPU recommended (works with Nvidia). ~15GB download.
+
 ### Caveats
 
 - **Driver aid, not a safety system** — no certification, does not replace mirrors or head checks
