@@ -124,6 +124,170 @@ Everything suction-mount or magnetic so you leave no trace in someone else's cab
 
 ---
 
+## DIY Portable AI Alert System
+
+A fully wireless, magnetic-mount ADAS you own and carry between jobs. Every external sensor has its own battery and WiFi link — zero cables outside the cab. Rigs in ~12 minutes, derigs in ~8. Fits a Peli 1400 case.
+
+### Architecture
+
+```
+                    ┌──────────────────────────────────┐
+                    │          IN-CAB HUB               │
+                    │  Pi 5 + Hailo-8 (26 TOPS)         │
+                    │  7" touchscreen (suction mount)    │
+                    │  Bluetooth speaker (alerts)        │
+                    │  Powered: 12V cig lighter → USB-C  │
+                    └──────────┬───────────────────────┘
+                               │ WiFi (Pi hosts AP)
+          ┌────────────────────┼────────────────────┐
+          │                    │                    │
+    ┌─────▼──────┐       ┌────▼─────┐       ┌─────▼──────┐
+    │ CAM 1      │       │ CAM 2    │       │ CAM 3      │
+    │ Left side  │       │ Forward  │       │ Rear       │
+    │ magnetic   │       │ suction  │       │ magnetic   │
+    │ IP69K      │       │ (inside) │       │ IP69K      │
+    │ 6400mAh    │       │          │       │ 6400mAh    │
+    └────────────┘       └──────────┘       └────────────┘
+
+    ┌────────────┐       ┌────────────┐     ┌────────────┐
+    │ RADAR POD 1│       │ RADAR POD 2│     │ RADAR POD 3│
+    │ Left front │       │ Left rear  │     │ Rear       │
+    │ LD2410     │       │ LD2410     │     │ LD2410     │
+    │ + ESP32    │       │ + ESP32    │     │ + ESP32    │
+    │ + IP67     │       │ + IP67     │     │ + IP67     │
+    │ battery    │       │ battery    │     │ battery    │
+    │ magnetic   │       │ magnetic   │     │ magnetic   │
+    └────────────┘       └────────────┘     └────────────┘
+```
+
+### Why These Sensors
+
+**Why NOT LiDAR through the windscreen:** Livox explicitly states the Mid-360 FOV "must not be blocked by an object, including glass." Standard windscreens have IR-filtering coatings that attenuate LiDAR signal by up to 90%. Behind-windscreen LiDAR only works with custom AR-coated glass (Hesai ET25 + Fuyao) — not an option when you're in a different truck each week.
+
+**Why NOT ToF sensors (VL53L5CX):** Range drops to ~30cm-1m in sunlight outdoors. Max range 4m even indoors. Not weatherproof. Useless on a moving truck.
+
+**Why mmWave radar (Hi-Link LD2410) for proximity:**
+- 24GHz FMCW — works in all weather (rain, fog, darkness, dust)
+- Detects distance (up to 6-8m) AND motion/presence
+- Ultra-low power: ~0.1mA standby, ~70mA active — a 10,000mAh battery lasts days
+- ~£3-5 per module — can afford multiple for coverage
+- Passes through ABS/plastic enclosures with no signal loss
+- ESP32 bridges radar data to Pi over WiFi
+
+### Hardware — Phase 1: Cameras + AI (~£1,000)
+
+| Item | Price |
+|------|-------|
+| Raspberry Pi 5 (8GB) | £80 |
+| Hailo-8 M.2 AI Kit (26 TOPS) | £170 |
+| Pi cooler + PSU + 128GB SD | £34 |
+| Auto-Vox magnetic wireless cameras x3 (1080p, IP69K, WiFi, 6400mAh battery) | £480 |
+| 7" IPS display + suction mount | £80 |
+| Bluetooth speaker (JBL Go or similar) | £20 |
+| 12V-to-5V USB-C buck converter | £15 |
+| USB WiFi adapter (dedicated camera network) | £12 |
+| Peli 1400 case | £60 |
+| Cables, velcro, misc | £15 |
+
+### Hardware — Phase 2: Wireless Radar Pods + Vehicle Data (+~£180)
+
+| Item | Price |
+|------|-------|
+| Hi-Link LD2410 24GHz radar modules x3 | £15 |
+| ESP32-C3 mini boards x3 (WiFi bridge) | £15 |
+| IP67 waterproof power banks x3 (OUTXE 10,000mAh) | £75 |
+| 3D-printed ABS weatherproof enclosures x3 + N52 neodymium magnetic bases | £30 |
+| Wiring, connectors, USB-C cables for charging | £15 |
+| OBDLink MX+ wireless OBD-II adapter (Bluetooth to Pi) | £30 |
+
+### Hardware — Phase 3: 3D Forward Radar + Compute Upgrade (+~£370)
+
+| Item | Price |
+|------|-------|
+| TI IWR6843ISK eval board (60GHz 3D radar — forward collision with velocity + angle) | £170 |
+| Nvidia Jetson Orin Nano Super (67 TOPS — replaces Pi for full sensor fusion) | £200 |
+
+### Sensor Placement
+
+**Camera 1 — LEFT BLIND SPOT (priority #1):** Magnetic mount to left cab panel below passenger window, angled 30° down. Covers the "killing zone" — the area alongside the cab where cyclists and pedestrians are invisible. #1 cause of HGV fatalities in the UK. Self-powered, wireless.
+
+**Camera 2 — FORWARD:** Suction mount inside windscreen, top-centre. Forward collision warning. Powered from Pi USB.
+
+**Camera 3 — REAR:** Magnetic mount to rear cab panel above fifth wheel. Reversing detection. Self-powered, wireless.
+
+**Radar Pod 1 — LEFT FRONT:** Magnetic mount to left cab panel, below and forward of Camera 1. LD2410 detects humans 0-6m from the left front corner. ESP32 streams detection data over WiFi. IP67 battery inside weatherproof enclosure.
+
+**Radar Pod 2 — LEFT REAR:** Magnetic mount to left cab panel, rear quarter. Covers blind spot behind driver's shoulder. Same self-contained pod design.
+
+**Radar Pod 3 — REAR:** Magnetic mount to rear cab panel. Precise reversing proximity detection — actual measured distance to obstacles when manoeuvring.
+
+**OBD-II Dongle — IN-CAB:** Plugs into truck's OBD-II diagnostic port (all modern HGVs have one, usually under the dashboard). Streams vehicle data over Bluetooth to the Pi. Reads steering wheel angle, vehicle speed, throttle position, brake status, and indicator state. Takes 5 seconds to plug in, 5 seconds to pull out. The critical use case: **when the system detects the steering wheel turning left AND a cyclist/pedestrian is in the left blind spot, it escalates straight to DANGER alert — the driver is actively turning into someone.** Also enables speed-aware alerts (suppress low-priority alerts at motorway speed, escalate everything at low-speed urban manoeuvring).
+
+### Power — Fully Wireless
+
+**In-cab (12V truck power):**
+- Pi 5 + Hailo-8: ~12W via 12V-to-USB-C buck converter from cigarette lighter
+- Display: ~2W from Pi USB
+- Speaker: internal battery, Bluetooth
+
+**External sensors (self-powered):**
+- Cameras x2 external: internal 6400mAh batteries, ~5hr runtime. Recharge via USB-C during mandatory 45-min break
+- Radar pods x3: IP67 10,000mAh power banks. LD2410 (~70mA) + ESP32 (~80mA) = ~150mA total. 10,000mAh ÷ 150mA = **~66 hours runtime. Charge weekly.**
+
+**Total truck power draw: ~14W** — just the Pi + display.
+
+### Software
+
+- **OS:** Raspberry Pi OS 64-bit
+- **AI Detection:** YOLOv8n exported to Hailo HEF format — detects person, cyclist, motorcycle, car, bus, truck
+- **Camera ingest:** OpenCV VideoCapture pulling RTSP/MJPEG over WiFi
+- **Radar ingest:** ESP32 firmware reads LD2410 UART (target distance + motion state), sends JSON over WiFi/UDP to Pi
+- **Vehicle data ingest (Phase 2):** python-OBD library reads OBD-II via Bluetooth — steering angle, speed, throttle, brake, indicators. Polled at ~10Hz.
+- **Alert logic — 3 levels:**
+  - CAUTION — amber overlay (object detected in zone)
+  - WARNING — red overlay + tone (object close or approaching)
+  - DANGER — red flash + spoken alert ("CYCLIST LEFT SIDE", "PERSON REAR") via pyttsx3/espeak
+- **Turn-into-collision detection (Phase 2):** If steering wheel is turning left AND left indicator is on AND cyclist/pedestrian detected in left blind spot → immediate DANGER escalation + loud repeated spoken warning "STOP — CYCLIST LEFT SIDE". This is the #1 killer scenario for UK HGVs.
+- **Speed-aware alerting (Phase 2):** At low speed (<15mph, urban manoeuvring) all alerts are active and aggressive. At motorway speed (>50mph) suppress close-proximity side alerts (objects alongside at motorway speed are in adjacent lanes, not in your blind spot). Forward collision stays active at all speeds.
+- **Phase 1 proximity (camera-only):** Bounding box size estimation — larger box = closer. Rough but functional.
+- **Phase 2 proximity (camera + radar + vehicle data fusion):** Camera provides object class. Radar provides distance + motion. OBD-II provides steering angle + speed + indicators. Fused: "Cyclist, 2.1m, steering left, indicator on" → DANGER
+- **Display:** OpenCV composite of 3 camera feeds with detection overlays on 7" screen
+- **Recording (optional):** FFmpeg rolling buffer to USB SSD — continuous dashcam of all feeds
+- **Config:** Flask web UI accessible from phone for tuning sensitivity, zones, alert sounds
+
+### Rig Procedure (~12 min)
+
+1. **In-cab power (2 min):** Plug 12V splitter. Plug Pi USB-C buck converter. Plug OBD-II dongle into diagnostic port (Phase 2). Power on Pi.
+2. **In-cab setup (3 min):** Suction-mount display. Place Pi in padded pouch. Suction-mount forward camera to windscreen. Place speaker on dash.
+3. **External — stick and go (5 min):** Walk around truck. Each device: pull from case, slap onto cab panel (magnetic), press power button. Left camera → left front radar pod → left rear radar pod → rear camera → rear radar pod. All self-powered, all auto-connect to Pi's WiFi AP.
+4. **Verify (2 min):** Check display shows 3 camera feeds + radar status. Wave hand in front of each camera. Confirm audio alert. Drive off.
+
+### Derig (~8 min)
+
+Walk around truck. Pull each magnetic device off, press power button to sleep. Pack into Peli 1400 foam cutouts. Unplug Pi and display. Nothing left on the truck.
+
+### Cost Summary
+
+| Phase | What | Cost | Running Total |
+|-------|------|------|---------------|
+| 1 | Cameras + Pi + Hailo-8 + Display + Alerts | ~£1,000 | ~£1,000 |
+| 2 | 3x wireless radar pods + OBD-II vehicle data | ~£180 | ~£1,180 |
+| 3 | TI IWR6843 3D forward radar + Jetson Orin Nano | ~£370 | ~£1,550 |
+
+> Compare: a commercial Mobileye Shield+ is £2,000-4,000, permanently fitted to one truck, and you don't own it. This system costs less, is fully portable, and you carry it between jobs.
+
+### Caveats
+
+- **Driver aid, not a safety system** — no certification, does not replace mirrors or head checks
+- **False positives** — tune aggressively or you'll learn to ignore it, making it worse than useless
+- **Camera WiFi range** — Auto-Vox claims 50-70ft but metal cab walls may reduce this. Fallback: wired USB cameras via flat window gasket cables
+- **Camera battery life** — 5hrs per charge. Charge during mandatory 45-min break after 4.5hrs driving
+- **Radar pod battery life** — ~66hrs continuous. Charge weekly via USB-C
+- **Employer policy** — check before mounting externally. Some companies prohibit temporary mods
+- **Legal** — no UK law against temporary external cameras/sensors if they don't obstruct lights/plates/mirrors and are securely mounted
+
+---
+
 ## Retrofit AI Driving Assist Hardware
 
 Aftermarket ADAS (Advanced Driver Assistance Systems) that can be fitted to existing HGVs without permanent modification:
