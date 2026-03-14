@@ -71,3 +71,95 @@ With C+E + ADR + willingness to tramp, target roles like the one in Grays paying
 | 2. Complete bootcamp | 12–16 weeks | Free (fully funded) |
 | 3. ADR certification | 1–2 weeks | £300–500 |
 | 4. Start tanker work | Ongoing | Earning £38–45k+ |
+
+---
+
+## Tramping Tech Kit — Peli Case
+
+Everything suction-mount or magnetic so you leave no trace in someone else's cab. Fits a Peli 1510 or similar.
+
+### Power
+- 12V multi-socket splitter (compact)
+- 12V to 240V inverter (pocket size, ~150W)
+- USB-C PD charger + cables
+- Power bank (20,000mAh+)
+
+### Navigation & Comms
+- Truck sat nav (Garmin Dezl)
+- Magnetic dash mount
+- Phone + spare phone
+- DAB radio (pocket, battery powered)
+
+### Internet
+- Starlink Mini (flat panel, ~30x25cm — sits flat in case lid)
+- Starlink 12V power adapter (or run via inverter)
+- Starlink magnetic roof mount (no drill)
+- ~£225 hardware + ~£40/month roam plan
+
+### Entertainment & Downtime
+- Tablet or laptop
+- Bluetooth earbuds + over-ears (noise cancelling for sleeping)
+- USB stick / portable SSD with media
+
+### Dash & Security
+- Dash cam (suction mount, no hardwire)
+- Magnetic phone mount
+
+### Lighting
+- USB rechargeable headtorch
+- Small LED lantern (magnetic base — stick to cab roof)
+
+### Connectivity (Starlink backup)
+- Mobile Wi-Fi hotspot
+- SIM card (unlimited data)
+
+### Hacking & Radio
+- Flipper Zero (sub-GHz, RFID, NFC, infrared, GPIO)
+- Useful for testing depot access fobs, tyre pressure sensors, truck remote diagnostics
+
+### Misc
+- Multi-tool
+- Cable ties + velcro straps (tidy cables, remove when leaving cab)
+- Microfibre cloth (screen cleaning)
+
+---
+
+## Retrofit AI Driving Assist Hardware
+
+Aftermarket ADAS (Advanced Driver Assistance Systems) that can be fitted to existing HGVs without permanent modification:
+
+### Bitsensing ADAS Kit
+- Radar + camera retrofit package for trucks and buses
+- Blind Spot Information System, Forward Collision Warning, Rear Collision Warning, Surround View Monitoring
+- Meets UNECE R151 (blind spot) and R159 (moving off) regulations
+- Pilot results: 51% improvement in driver safety scores, 24% reduction in pedestrian collision warnings
+- [bitsensing.com](https://bitsensing.com)
+
+### Mobileye Shield+
+- Camera-based collision avoidance, retrofit for HGVs
+- Pedestrian and cyclist detection, lane departure, forward collision warnings
+- Visual and audio alerts via driver display
+- Widely used by UK fleets (TfL mandated for London operations)
+- [mobileye.com](https://www.mobileye.com)
+
+### WABCO (ZF) OnSide / OnGuardACTIVE
+- Blind spot detection retrofit kits
+- OnGuardACTIVE adds radar-based autonomous emergency braking
+- Bolt-on kits for most popular truck platforms
+- [zf.com](https://www.zf.com)
+
+### Gauzy Safety Tech
+- Camera monitor systems (CMS) + ADAS, fully homologated
+- Retrofit or OE fit, eliminates blind spots with real-time alerts
+- [gauzy.com](https://www.gauzy.com/safety-tech-adas/)
+
+### SerVision ADAS
+- Video processing collision avoidance for heavy trucks
+- Approved in EU, Israel, South Korea, Japan, China
+- [servision.net](https://servision.net/adas-hgv/)
+
+### Coming Soon — Full Autonomy
+- **Wayve AI Driver** — hardware-agnostic L2+ to L4, optimised for goods delivery
+- **Pony AI Gen-4** — autonomous truck kit, mass production expected 2026, 70% cost reduction vs previous gen
+
+> **Note:** Most retrofit ADAS is fleet-level kit — talk to your employer about fitting. The Mobileye and Bitsensing units are the most practical for individual drivers to advocate for.
