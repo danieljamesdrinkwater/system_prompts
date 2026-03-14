@@ -1,0 +1,53 @@
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+pydantic>=2.9.0
+pydantic-settings>=2.6.0
+aiosqlite>=0.20.0
+aiofiles>=24.1.0
+httpx>=0.27.0
+pyyaml>=6.0.0
+python-multipart>=0.0.9
+websockets>=13.0
+
+# MQTT
+gmqtt>=0.6.16
+
+# AI
+ollama>=0.4.0
+
+# Voice
+faster-whisper>=1.0.0
+piper-tts>=1.2.0
+
+# Scheduling
+apscheduler>=3.10.0
+
+# Device discovery
+zeroconf>=0.131.0
+wakeonlan>=3.1.0
+
+# Calendar
+caldav>=1.3.0
+google-api-python-client>=2.100.0
+google-auth>=2.25.0
+google-auth-oauthlib>=1.2.0
+
+# Mail
+aioimaplib>=1.0.1
+aiosmtplib>=3.0.0
+
+# Telephony
+# pjsua2 must be installed from system packages (python3-pjsip)
+
+# Camera / CCTV
+opencv-python-headless>=4.9.0
+ultralytics>=8.1.0
+onvif-zeep>=0.2.12
+
+# Security
+python-jose[cryptography]>=3.3.0
+
+# Testing
+pytest>=8.0.0
+pytest-asyncio>=0.23.0
+pytest-cov>=4.1.0

@@ -1,0 +1,61 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./config.yaml:/app/config.yaml:ro
+      - nexus-data:/app/data
+      - /mnt/storage:/mnt/storage
+      - ./models:/app/models
+    devices:
+      - /dev/video0:/dev/video0
+    privileged: true
+    depends_on:
+      - mosquitto
+      - ollama
+    environment:
+      - NEXUS_CONFIG_PATH=/app/config.yaml
+      - NEXUS_DATA_DIR=/app/data
+    networks:
+      - nexus-net
+    restart: unless-stopped
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - mosquitto-data:/mosquitto/data
+      - mosquitto-log:/mosquitto/log
+    networks:
+      - nexus-net
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-models:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    networks:
+      - nexus-net
+    restart: unless-stopped
+
+networks:
+  nexus-net:
+    driver: bridge
+
+volumes:
+  nexus-data:
+  mosquitto-data:
+  mosquitto-log:
+  ollama-models:

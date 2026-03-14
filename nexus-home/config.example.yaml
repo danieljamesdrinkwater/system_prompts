@@ -1,0 +1,100 @@
+server:
+  host: "0.0.0.0"
+  port: 8000
+  api_keys:
+    - "change-me-to-a-real-key"
+  log_level: "info"
+
+mqtt:
+  host: "mosquitto"
+  port: 1883
+  username: ""
+  password: ""
+  topic_prefix: "nexus"
+
+ai:
+  ollama_url: "http://ollama:11434"
+  default_model: "llama3.2"
+
+voice:
+  stt_model: "base.en"
+  stt_device: "cpu"
+  tts_model_path: "./models/en_US-lessac-medium.onnx"
+
+storage:
+  base_path: "/mnt/storage"
+  max_upload_mb: 500
+  auto_mount: true
+
+calendar:
+  caldav:
+    url: ""
+    username: ""
+    password: ""
+  google:
+    credentials_file: ""
+    calendar_id: "primary"
+  sync_interval_minutes: 5
+
+mail:
+  imap:
+    host: ""
+    port: 993
+    username: ""
+    password: ""
+    use_ssl: true
+  smtp:
+    host: ""
+    port: 587
+    username: ""
+    password: ""
+    from_address: ""
+  sync_interval_minutes: 2
+
+telephony:
+  sip:
+    server: ""
+    port: 5060
+    username: ""
+    password: ""
+    realm: ""
+  voicemail_path: "/app/data/voicemail"
+  auto_answer: false
+  ai_attendant: true
+
+cameras:
+  recording_path: "/mnt/storage/recordings"
+  snapshot_path: "/app/data/snapshots"
+  detection:
+    model: "yolov8n.pt"
+    confidence_threshold: 0.5
+    detection_fps: 5
+    classes:
+      - "person"
+      - "car"
+      - "truck"
+      - "dog"
+      - "cat"
+      - "package"
+  retention_days: 30
+
+notifications:
+  smtp_host: ""
+  smtp_port: 587
+  smtp_user: ""
+  smtp_pass: ""
+  smtp_from: ""
+  webhook_urls: []
+  ntfy_topic: ""
+
+energy:
+  enabled: true
+  retention_days: 90
+
+rooms:
+  - name: "Living Room"
+    devices: []
+  - name: "Bedroom"
+    devices: []
+  - name: "Kitchen"
+    devices: []

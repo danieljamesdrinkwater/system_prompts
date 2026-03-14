@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Home</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Nexus Home</h1>
+        <div id="status-bar">
+            <span id="ws-status" class="status-dot offline" title="WebSocket"></span>
+            <span id="unread-badge" class="badge hidden">0</span>
+        </div>
+    </header>
+
+    <nav>
+        <button class="nav-btn active" data-section="devices">Devices</button>
+        <button class="nav-btn" data-section="cameras">Cameras</button>
+        <button class="nav-btn" data-section="automation">Automation</button>
+        <button class="nav-btn" data-section="energy">Energy</button>
+        <button class="nav-btn" data-section="storage">Storage</button>
+        <button class="nav-btn" data-section="calendar">Calendar</button>
+        <button class="nav-btn" data-section="mail">Mail</button>
+        <button class="nav-btn" data-section="calls">Calls</button>
+        <button class="nav-btn" data-section="ai">AI Chat</button>
+    </nav>
+
+    <main>
+        <!-- Devices -->
+        <section id="devices" class="section active">
+            <div class="section-header">
+                <h2>Devices</h2>
+                <button onclick="discoverDevices()" class="btn">Discover</button>
+            </div>
+            <div id="device-grid" class="card-grid"></div>
+        </section>
+
+        <!-- Cameras -->
+        <section id="cameras" class="section">
+            <div class="section-header">
+                <h2>Cameras</h2>
+                <button onclick="discoverCameras()" class="btn">Discover ONVIF</button>
+            </div>
+            <div id="camera-grid" class="card-grid"></div>
+            <h3>Recent Events</h3>
+            <div id="camera-events" class="event-list"></div>
+        </section>
+
+        <!-- Automation -->
+        <section id="automation" class="section">
+            <div class="section-header">
+                <h2>Automation Rules</h2>
+                <button onclick="showAddRule()" class="btn">Add Rule</button>
+            </div>
+            <div id="rules-list" class="list"></div>
+            <h3>Scenes</h3>
+            <div id="scenes-list" class="card-grid"></div>
+        </section>
+
+        <!-- Energy -->
+        <section id="energy" class="section">
+            <div class="section-header">
+                <h2>Energy Monitor</h2>
+                <select id="energy-range" onchange="loadEnergy()">
+                    <option value="24">Last 24h</option>
+                    <option value="168">Last 7 days</option>
+                    <option value="720">Last 30 days</option>
+                </select>
+            </div>
+            <div id="energy-summary" class="summary-cards"></div>
+            <div id="energy-chart" class="chart-area"></div>
+        </section>
+
+        <!-- Storage -->
+        <section id="storage" class="section">
+            <div class="section-header">
+                <h2>Files</h2>
+                <button onclick="autoMount()" class="btn">Auto-Mount Drives</button>
+            </div>
+            <div id="disk-info" class="summary-cards"></div>
+            <div id="file-path-bar">
+                <span id="current-path">/</span>
+            </div>
+            <div id="file-list" class="list"></div>
+            <input type="file" id="file-upload" style="display:none" onchange="uploadFile()">
+            <button onclick="document.getElementById('file-upload').click()" class="btn">Upload</button>
+        </section>
+
+        <!-- Calendar -->
+        <section id="calendar" class="section">
+            <div class="section-header">
+                <h2>Calendar</h2>
+                <button onclick="syncCalendar()" class="btn">Sync</button>
+            </div>
+            <div id="events-list" class="list"></div>
+        </section>
+
+        <!-- Mail -->
+        <section id="mail" class="section">
+            <div class="section-header">
+                <h2>Mail</h2>
+                <button onclick="syncMail()" class="btn">Sync</button>
+            </div>
+            <div id="mail-list" class="list"></div>
+        </section>
+
+        <!-- Calls -->
+        <section id="calls" class="section">
+            <div class="section-header">
+                <h2>Telephony</h2>
+                <span id="sip-status"></span>
+            </div>
+            <div class="dial-pad">
+                <input type="text" id="dial-number" placeholder="Phone number">
+                <button onclick="dialNumber()" class="btn btn-call">Call</button>
+                <button onclick="hangUp()" class="btn btn-hangup">Hang Up</button>
+            </div>
+            <h3>Call History</h3>
+            <div id="call-history" class="list"></div>
+        </section>
+
+        <!-- AI Chat -->
+        <section id="ai" class="section">
+            <div class="section-header">
+                <h2>AI Assistant</h2>
+            </div>
+            <div id="chat-messages" class="chat-area"></div>
+            <div class="chat-input">
+                <input type="text" id="chat-input" placeholder="Ask anything..." onkeydown="if(event.key==='Enter')sendChat()">
+                <button onclick="sendChat()" class="btn">Send</button>
+                <button onclick="voiceCommand()" class="btn">Mic</button>
+            </div>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>
