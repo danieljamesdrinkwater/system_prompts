@@ -122,6 +122,103 @@ Everything suction-mount or magnetic so you leave no trace in someone else's cab
 - Cable ties + velcro straps (tidy cables, remove when leaving cab)
 - Microfibre cloth (screen cleaning)
 
+### Shopping List — eBay Links & Prices
+
+All prices are approximate eBay UK prices at time of writing. Buy used/refurbished where noted to save money.
+
+#### Power (~£55)
+
+| Item | Price | eBay Link |
+|------|-------|-----------|
+| 3-way 12V cigarette lighter splitter + USB | ~£8 | [eBay UK — 12V splitters](https://www.ebay.co.uk/itm/363017768744) |
+| 12V to 240V 150W pocket inverter | ~£15 | [eBay UK — 12V inverters](https://www.ebay.co.uk/b/12V-Vehicle-Power-Inverters/35000/bn_100740154) |
+| 65W USB-C PD car charger (12V/24V input) | ~£12 | [eBay — 65W PD car charger](https://www.ebay.com/itm/406558847246) |
+| 20,000mAh USB-C PD power bank | ~£20 | [eBay UK — 20000mAh power banks](https://www.ebay.co.uk/shop/power-banks-20000?_nkw=power+banks+20000) |
+
+#### Navigation & Comms (~£180)
+
+| Item | Price | eBay Link |
+|------|-------|-----------|
+| Garmin Dezl LGV610 truck sat nav (refurbished) | ~£150 | [eBay UK — Garmin Dezl](https://www.ebay.co.uk/shop/garmin-dezl?_nkw=garmin+dezl) |
+| Magnetic suction cup dash/windscreen mount | ~£8 | [eBay UK — magnetic dash mounts](https://www.ebay.co.uk/b/bn_7028208279) |
+| Majority Petersfield-Go pocket DAB radio (refurb) | ~£22 | [eBay UK — portable DAB radios](https://www.ebay.co.uk/b/bn_2942987) |
+
+#### Internet (~£200)
+
+| Item | Price | eBay Link |
+|------|-------|-----------|
+| Starlink Mini kit | ~£179 | [eBay UK — Starlink Mini](https://www.ebay.co.uk/shop/mini-starlink?_nkw=mini+starlink) |
+| Starlink magnetic roof mount (no drill) | ~£20 | Search "starlink mini magnetic mount" on eBay UK |
+
+#### Entertainment & Downtime (~£40)
+
+| Item | Price | eBay Link |
+|------|-------|-----------|
+| Soundcore Life Q20 over-ear ANC headphones (refurb) | ~£30 | [eBay UK — noise cancelling headphones](https://www.ebay.co.uk/b/bn_878553) |
+| Bluetooth earbuds (sleep-friendly, TWS) | ~£8 | [eBay UK — wireless earbuds](https://www.ebay.co.uk/shop/noise-cancelling-earbuds-wireless?_nkw=noise+cancelling+earbuds+wireless) |
+| Portable SSD 500GB USB-C | ~£30 | Search "portable SSD 500GB" on eBay UK |
+
+#### Dash & Security (~£30)
+
+| Item | Price | eBay Link |
+|------|-------|-----------|
+| 1080p dash cam (suction mount, no hardwire) | ~£25 | [eBay UK — 1080p dash cams](https://www.ebay.co.uk/b/bn_1628415) |
+| Magnetic phone mount (windscreen suction) | ~£5 | [eBay UK — magnetic phone mounts](https://www.ebay.co.uk/b/bn_63517266) |
+
+#### Lighting (~£12)
+
+| Item | Price | eBay Link |
+|------|-------|-----------|
+| USB rechargeable LED headtorch | ~£7 | [eBay UK — rechargeable head torches](https://www.ebay.co.uk/b/bn_9307307) |
+| Magnetic base LED lantern (USB rechargeable) | ~£5 | [eBay UK — USB rechargeable lanterns](https://www.ebay.co.uk/b/USB-Rechargeable-Camping-Hiking-Lanterns/106983/bn_57458071) |
+
+#### Connectivity (~£25)
+
+| Item | Price | eBay Link |
+|------|-------|-----------|
+| Mobile Wi-Fi hotspot (unlocked 4G) | ~£20 | Search "4G WiFi hotspot unlocked" on eBay UK |
+| Unlimited data SIM (Smarty/Three/Voxi) | ~£5 setup | Buy direct from provider |
+
+#### Hacking & Radio (~£135)
+
+| Item | Price | eBay Link |
+|------|-------|-----------|
+| Flipper Zero | ~£135 | [eBay UK — Flipper Zero](https://www.ebay.co.uk/p/8057479125) |
+
+> **Tip:** Buy the Flipper Zero direct from [shop.flipperzero.one](https://shop.flipperzero.one/) for ~£135/$169 — eBay resellers charge £200+.
+
+#### Misc (~£15)
+
+| Item | Price | eBay Link |
+|------|-------|-----------|
+| Multi-tool (Leatherman/Gerber style) | ~£10 | Search "multi tool pliers" on eBay UK |
+| Cable ties + velcro straps pack | ~£3 | Search "reusable velcro cable ties" on eBay UK |
+| Microfibre cloths (pack of 10) | ~£2 | Search "microfibre cloth pack" on eBay UK |
+
+#### Peli Case (~£60)
+
+| Item | Price | eBay Link |
+|------|-------|-----------|
+| Peli 1510 carry-on case (or equiv) | ~£60 | Search "Peli 1510" or "waterproof hard case" on eBay UK |
+
+### Total Estimated Cost: ~£750
+
+| Category | Cost |
+|----------|------|
+| Power | ~£55 |
+| Navigation & Comms | ~£180 |
+| Internet | ~£200 |
+| Entertainment | ~£40 |
+| Dash & Security | ~£30 |
+| Lighting | ~£12 |
+| Connectivity | ~£25 |
+| Hacking & Radio | ~£135 |
+| Misc | ~£15 |
+| Case | ~£60 |
+| **Total** | **~£750** |
+
+> Buy refurbished where possible (Garmin, headphones, Starlink). Check eBay daily deals and use discount codes (e.g. SPRINGY10 for 10% off, valid until 16 March 2026).
+
 ---
 
 ## DIY Portable AI Alert System
