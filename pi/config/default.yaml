@@ -1,0 +1,53 @@
+# HGV-ADAS Default Configuration
+
+# Detection model
+model_path: models/yolov8n.pt
+confidence_threshold: 0.45
+target_classes:
+  - person
+  - bicycle
+  - motorcycle
+  - car
+  - bus
+  - truck
+
+# Camera sources (RTSP/MJPEG URLs or device indices)
+cameras:
+  - id: left
+    url: "0"          # Change to RTSP URL for Auto-Vox camera
+    zone: left
+    flip: false
+  - id: forward
+    url: "1"
+    zone: forward
+    flip: false
+  - id: rear
+    url: "2"
+    zone: rear
+    flip: false
+
+# Radar pods (ESP32 → UDP)
+radar_enabled: true
+radar_port: 5005
+
+# OBD-II vehicle data
+obd_enabled: false
+obd_port: ""          # e.g. /dev/rfcomm0 for Bluetooth OBD-II
+
+# Alert distance thresholds (metres)
+caution_distance: 6.0
+warning_distance: 3.0
+danger_distance: 1.5
+
+# Turn-into-collision detection
+steering_left_threshold: 15.0   # degrees — trigger escalation
+low_speed_threshold: 24.0       # km/h (~15mph) — urban mode
+
+# Display
+display_width: 1024
+display_height: 600
+fullscreen: false
+
+# Audio
+alert_volume: 1.0
+speech_rate: 180
