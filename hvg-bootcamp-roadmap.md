@@ -122,9 +122,17 @@ Everything suction-mount or magnetic so you leave no trace in someone else's cab
 - Cable ties + velcro straps (tidy cables, remove when leaving cab)
 - Microfibre cloth (screen cleaning)
 
-### Shopping List — eBay Links & Prices
+---
+
+## Shopping Lists — eBay Links & Prices
 
 All prices are approximate eBay UK prices at time of writing. Buy used/refurbished where noted to save money.
+
+---
+
+### Part 1: Peli Case — Tech Kit (~£750)
+
+Everything below fits inside a Peli 1510 carry-on case. This is your portable office/entertainment/connectivity kit.
 
 #### Power (~£55)
 
@@ -187,7 +195,7 @@ All prices are approximate eBay UK prices at time of writing. Buy used/refurbish
 
 > **Tip:** Buy the Flipper Zero direct from [shop.flipperzero.one](https://shop.flipperzero.one/) for ~£135/$169 — eBay resellers charge £200+.
 
-#### Misc (~£15)
+#### Misc Tech (~£15)
 
 | Item | Price | eBay Link |
 |------|-------|-----------|
@@ -201,7 +209,7 @@ All prices are approximate eBay UK prices at time of writing. Buy used/refurbish
 |------|-------|-----------|
 | Peli 1510 carry-on case (or equiv) | ~£60 | Search "Peli 1510" or "waterproof hard case" on eBay UK |
 
-### Total Estimated Cost: ~£750
+#### Peli Case Tech Kit Total: ~£750
 
 | Category | Cost |
 |----------|------|
@@ -213,11 +221,112 @@ All prices are approximate eBay UK prices at time of writing. Buy used/refurbish
 | Lighting | ~£12 |
 | Connectivity | ~£25 |
 | Hacking & Radio | ~£135 |
-| Misc | ~£15 |
+| Misc Tech | ~£15 |
 | Case | ~£60 |
-| **Total** | **~£750** |
+| **Peli Tech Total** | **~£750** |
 
-> Buy refurbished where possible (Garmin, headphones, Starlink). Check eBay daily deals and use discount codes (e.g. SPRINGY10 for 10% off, valid until 16 March 2026).
+---
+
+### Part 2: Living Kit — Cab Essentials (~£350)
+
+Everything you need to live comfortably on the road as a tramping driver. This goes in a holdall or duffel bag, NOT the Peli case.
+
+#### Sleeping (~£90)
+
+| Item | Price | eBay Link |
+|------|-------|-----------|
+| Truck cab sleeping bag (season 3-4, compact) | ~£25 | [eBay UK — sleeping bags](https://www.ebay.co.uk/b/Camping-Sleeping-Bags/36110/bn_1858423) |
+| Memory foam mattress topper (truck cab size, ~190x70cm) | ~£30 | [eBay UK — single memory foam toppers](https://www.ebay.co.uk/b/Single-Memory-Foam-Mattress-Toppers/131588/bn_89932277) |
+| Travel pillow (compact, memory foam) | ~£10 | [eBay UK — memory foam travel pillows](https://www.ebay.co.uk/b/Memory-Foam-Travel-Pillows/175751/bn_117913405) |
+| Fitted cab sheet x2 (stretchy jersey, fits bunk mattress) | ~£12 | [eBay UK — fitted single sheets](https://www.ebay.co.uk/b/Single-Fitted-Sheets/20469/bn_2387032) |
+| Fleece blanket (backup/layering) | ~£8 | [eBay UK — fleece blankets](https://www.ebay.co.uk/b/Fleece-Blankets/20904/bn_1887180) |
+| Pillow case x2 | ~£5 | Search "pillow cases pair" on eBay UK |
+
+#### Cooking & Drinks (~£70)
+
+| Item | Price | eBay Link |
+|------|-------|-----------|
+| 24V truck kettle (NOT 12V — HGVs are 24V) | ~£20 | [eBay UK — 24V kettles](https://www.ebay.co.uk/b/24V-Travel-Kettles/177006/bn_111483001) |
+| Portable gas camping stove (single burner) | ~£12 | [eBay UK — camping stoves](https://www.ebay.co.uk/b/Camping-Stoves/181386/bn_1858519) |
+| Gas canisters x4 (CP250 butane) | ~£8 | Search "camping gas canisters" on eBay UK |
+| Stanley Classic thermos flask 1L | ~£15 | [eBay UK — Stanley thermos](https://www.ebay.co.uk/b/Stanley-Thermos/36452/bn_36567684) |
+| Mess tin / camping cookware set (pot, pan, mug) | ~£10 | [eBay UK — camping cookware](https://www.ebay.co.uk/b/Camping-Cookware/87082/bn_1858483) |
+| Plastic cutlery set + plate + bowl (reusable) | ~£5 | Search "camping cutlery set" on eBay UK |
+
+> **Important:** HGVs run 24V electrics. A 12V kettle will NOT work — make sure it's 24V.
+
+#### Hygiene & Toiletries (~£35)
+
+| Item | Price | eBay Link |
+|------|-------|-----------|
+| Hanging wash bag (toiletry organiser) | ~£8 | [eBay UK — hanging wash bags](https://www.ebay.co.uk/b/Wash-Bags/169291/bn_73843497) |
+| Quick-dry microfibre towel (large) | ~£8 | [eBay UK — microfibre towels](https://www.ebay.co.uk/b/Microfibre-Towels/20726/bn_109990085) |
+| Face flannel / small towel | ~£3 | Search "face cloth flannel pack" on eBay UK |
+| Baby wipes (bulk pack, fragrance free) | ~£5 | Search "baby wipes bulk" on eBay UK |
+| Shower flip flops (for truck stop showers) | ~£5 | [eBay UK — shower flip flops](https://www.ebay.co.uk/b/Flip-Flops/11504/bn_339096) |
+| Hand sanitiser (500ml pump) | ~£3 | Search "hand sanitiser 500ml" on eBay UK |
+| Travel mirror (suction cup) | ~£3 | Search "suction mirror shaving" on eBay UK |
+
+#### Workwear & PPE (~£65)
+
+| Item | Price | eBay Link |
+|------|-------|-----------|
+| Hi-vis vest x2 (EN ISO 20471 Class 2) | ~£8 | [eBay UK — hi-vis vests](https://www.ebay.co.uk/b/Hi-Vis-Vests/177798/bn_55195254) |
+| Hi-vis waterproof jacket (Class 3, hooded) | ~£20 | [eBay UK — hi-vis waterproof jackets](https://www.ebay.co.uk/b/Hi-Vis-Jackets/57988/bn_55195266) |
+| Steel toe cap safety boots (S3 rated, waterproof) | ~£30 | [eBay UK — steel toe cap boots](https://www.ebay.co.uk/b/Steel-Toe-Cap-Boots/11498/bn_79483279) |
+| Waterproof over-trousers | ~£7 | Search "waterproof over trousers" on eBay UK |
+
+> **Note:** Most depots require hi-vis and steel toe caps before you're allowed on-site. Have these from day one.
+
+#### Cab Comfort (~£40)
+
+| Item | Price | eBay Link |
+|------|-------|-----------|
+| Blackout suction cup window blinds (set of 3) | ~£12 | [eBay UK — suction cup blinds](https://www.ebay.co.uk/b/Suction-Cup-Blinds/20566/bn_72483619) |
+| 12V/24V cool box (15-20L) | ~£20 | [eBay UK — 12V cool boxes](https://www.ebay.co.uk/b/Electric-Cool-Boxes/116427/bn_1858398) |
+| Bungee cord set (organise gear in cab) | ~£4 | Search "bungee cord set" on eBay UK |
+| Car bin (small, clip-on or hanging) | ~£4 | Search "car bin hanging" on eBay UK |
+
+#### Misc Living (~£50)
+
+| Item | Price | eBay Link |
+|------|-------|-----------|
+| Foam earplugs (bulk 50 pair box) | ~£5 | Search "foam earplugs bulk" on eBay UK |
+| Eye mask (sleep, contoured) | ~£3 | Search "sleep eye mask contoured" on eBay UK |
+| Bin bags (roll of 50) | ~£3 | Search "bin bags roll" on eBay UK |
+| Laundry bag (drawstring, for dirty clothes) | ~£3 | Search "laundry bag drawstring" on eBay UK |
+| Clothesline + pegs (for drying towels/wash) | ~£3 | Search "travel clothesline" on eBay UK |
+| First aid kit (compact) | ~£8 | [eBay UK — first aid kits](https://www.ebay.co.uk/b/First-Aid-Kits/158690/bn_2310826) |
+| Torch (small, pocket, LED) | ~£5 | Search "pocket torch LED" on eBay UK |
+| 12V phone charger cable (long, 2m USB-C) | ~£5 | Search "USB-C cable 2m" on eBay UK |
+| Notebook + pen (tacho notes, delivery notes) | ~£2 | Search "pocket notebook pen" on eBay UK |
+| Cab air freshener (clip-on vent type) | ~£3 | Search "car air freshener clip" on eBay UK |
+| Sunglasses (polarised, driving) | ~£8 | Search "polarised driving sunglasses" on eBay UK |
+| Umbrella (compact, windproof) | ~£5 | Search "compact windproof umbrella" on eBay UK |
+
+#### Living Kit Total: ~£350
+
+| Category | Cost |
+|----------|------|
+| Sleeping | ~£90 |
+| Cooking & Drinks | ~£70 |
+| Hygiene & Toiletries | ~£35 |
+| Workwear & PPE | ~£65 |
+| Cab Comfort | ~£40 |
+| Misc Living | ~£50 |
+| **Living Kit Total** | **~£350** |
+
+---
+
+### Grand Total — All Tramping Gear
+
+| Kit | Cost |
+|-----|------|
+| Peli Case — Tech Kit | ~£750 |
+| Living Kit — Cab Essentials | ~£350 |
+| **Grand Total** | **~£1,100** |
+
+> Buy refurbished where possible (Garmin, headphones, Starlink). Check eBay daily deals and use discount codes. Buy workwear and sleeping gear before your first tramping job — you'll need it from night one.
 
 ---
 
