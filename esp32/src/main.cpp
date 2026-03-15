@@ -15,6 +15,7 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
 #include <ArduinoJson.h>
+#include <ArduinoOTA.h>
 #include <ld2410.h>
 
 // ── Configuration ──────────────────────────────────────────────
@@ -72,6 +73,16 @@ void setup() {
         wifiConnected = true;
         Serial.printf("\n[WiFi] Connected — IP: %s\n", WiFi.localIP().toString().c_str());
         udp.begin(0);  // Ephemeral source port
+
+        // OTA updates — flash new firmware over WiFi from PlatformIO
+        ArduinoOTA.setHostname(POD_ID);
+        ArduinoOTA.onStart([]() { Serial.println("[OTA] Update starting..."); });
+        ArduinoOTA.onEnd([]() { Serial.println("\n[OTA] Done — rebooting"); });
+        ArduinoOTA.onError([](ota_error_t err) {
+            Serial.printf("[OTA] Error %u\n", err);
+        });
+        ArduinoOTA.begin();
+        Serial.println("[OTA] Ready");
     } else {
         Serial.println("\n[WiFi] Connection failed — will retry in loop");
     }
@@ -79,6 +90,11 @@ void setup() {
 
 // ── Main Loop ──────────────────────────────────────────────────
 void loop() {
+    // Handle OTA update requests
+    if (wifiConnected) {
+        ArduinoOTA.handle();
+    }
+
     // Read radar data
     radar.read();
 

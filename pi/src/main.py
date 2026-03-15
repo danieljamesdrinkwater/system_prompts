@@ -14,10 +14,13 @@ import time
 
 from camera import CameraManager
 from detector import Detector
+from tracker import Tracker
 from alert import AlertEngine
 from radar import RadarReceiver
 from vehicle import VehicleDataLink
 from display import Display
+from health import HealthMonitor
+from recorder import Recorder
 from config import Config
 
 logging.basicConfig(
@@ -36,10 +39,13 @@ class Pipeline:
 
         self.cameras = CameraManager(config)
         self.detector = Detector(config)
+        self.trackers = {}  # cam_id → Tracker
         self.alert_engine = AlertEngine(config)
         self.radar = RadarReceiver(config)
         self.vehicle = VehicleDataLink(config)
         self.display = Display(config)
+        self.health = HealthMonitor(config)
+        self.recorder = Recorder(config)
 
     def start(self):
         self.running = True
@@ -48,6 +54,7 @@ class Pipeline:
         self.radar.start()
         self.vehicle.start()
         self.cameras.start()
+        self.health.start()
 
         log.info("All subsystems started — entering main loop")
         self.alert_engine.speak("System active")
@@ -64,6 +71,8 @@ class Pipeline:
         self.cameras.stop()
         self.radar.stop()
         self.vehicle.stop()
+        self.health.stop()
+        self.recorder.close()
         self.display.close()
         log.info("Pipeline stopped")
 
@@ -74,13 +83,21 @@ class Pipeline:
                 time.sleep(0.01)
                 continue
 
-            # Run YOLOv8 detection on each camera frame
+            # Run YOLOv8 detection + tracking on each camera frame
             all_detections = {}
+            all_tracks = []
             for cam_id, frame in frames.items():
                 detections = self.detector.detect(frame)
                 all_detections[cam_id] = detections
+                self.health.record(cam_id)
 
-            # Get radar proximity data
+                # Track objects across frames
+                if cam_id not in self.trackers:
+                    self.trackers[cam_id] = Tracker(self.config)
+                tracks = self.trackers[cam_id].update(detections)
+                all_tracks.extend(tracks)
+
+            # Get radar proximity data (stale entries auto-filtered)
             radar_data = self.radar.get_latest()
 
             # Get vehicle state (steering, speed, indicators)
@@ -97,6 +114,12 @@ class Pipeline:
             # Fire audio alerts
             for alert in alerts:
                 self.alert_engine.fire(alert)
+
+            # Record telemetry
+            self.recorder.record(
+                all_detections, alerts, radar_data, vehicle_state,
+                tracks=all_tracks, frames=frames,
+            )
 
 
 def main():

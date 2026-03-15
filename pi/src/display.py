@@ -122,7 +122,10 @@ class Display:
 
             cv2.rectangle(frame, (x1, y1), (x2, y2), colour, 2)
 
-            label = f"{det.class_name} {det.confidence:.0%}"
+            # Show track ID if available
+            track_id = getattr(det, "track_id", None)
+            id_prefix = f"#{track_id} " if track_id else ""
+            label = f"{id_prefix}{det.class_name} {det.confidence:.0%}"
             if det.distance_estimate:
                 label += f" ~{det.distance_estimate:.1f}m"
 

@@ -4,6 +4,7 @@ import json
 import logging
 import socket
 import threading
+import time
 
 from config import Config
 
@@ -50,9 +51,18 @@ class RadarReceiver:
             self._sock.close()
 
     def get_latest(self) -> dict:
-        """Return dict of {pod_id: {distance, moving, energy}}."""
+        """Return dict of {pod_id: {distance, moving, energy}}.
+
+        Entries older than stale_timeout are excluded.
+        """
+        now = time.monotonic()
+        timeout = getattr(self.config, "radar_stale_timeout", 2.0)
         with self._lock:
-            return dict(self._data)
+            return {
+                pod_id: data
+                for pod_id, data in self._data.items()
+                if now - data.get("_received", 0) < timeout
+            }
 
     def _listen_loop(self):
         while self._running:
@@ -79,4 +89,5 @@ class RadarReceiver:
                     "moving": packet.get("moving", False),
                     "energy": packet.get("energy", 0),
                     "timestamp": packet.get("t", 0),
+                    "_received": time.monotonic(),
                 }

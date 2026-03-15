@@ -48,6 +48,23 @@ display_width: 1024
 display_height: 600
 fullscreen: false
 
+# Tracker
+tracker_iou_threshold: 0.25
+tracker_max_misses: 8
+
+# Radar stale timeout
+radar_stale_timeout: 2.0     # seconds — drop pods that go silent
+
+# Health monitoring
+health_stale_timeout: 3.0    # seconds — mark sensor offline
+
+# Telemetry recording (enable for debug/review)
+recording_enabled: false
+recording_dir: recordings
+recording_save_frames: false
+recording_frame_interval: 30
+recording_max_file_mb: 50
+
 # Audio
 alert_volume: 1.0
 speech_rate: 180

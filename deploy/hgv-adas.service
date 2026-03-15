@@ -1,0 +1,25 @@
+# systemd service for HGV-ADAS detection pipeline
+# Install:
+#   sudo cp hgv-adas.service /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable hgv-adas
+#   sudo systemctl start hgv-adas
+
+[Unit]
+Description=HGV-ADAS Detection Pipeline
+After=network.target hostapd.service
+Wants=hostapd.service
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/hgv-adas/pi
+ExecStart=/home/pi/hgv-adas/venv/bin/python src/main.py --config config/default.yaml
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+Environment=DISPLAY=:0
+
+[Install]
+WantedBy=multi-user.target

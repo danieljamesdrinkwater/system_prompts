@@ -51,6 +51,23 @@ class Config:
     display_height: int = 600
     fullscreen: bool = False
 
+    # Tracker
+    tracker_iou_threshold: float = 0.25
+    tracker_max_misses: int = 8
+
+    # Radar
+    radar_stale_timeout: float = 2.0  # seconds — drop stale pod data
+
+    # Health
+    health_stale_timeout: float = 3.0  # seconds — mark sensor offline
+
+    # Recording
+    recording_enabled: bool = False
+    recording_dir: str = "recordings"
+    recording_save_frames: bool = False
+    recording_frame_interval: int = 30  # Save every Nth frame
+    recording_max_file_mb: int = 50
+
     # Audio
     alert_volume: float = 1.0
     speech_rate: int = 180  # words per minute
