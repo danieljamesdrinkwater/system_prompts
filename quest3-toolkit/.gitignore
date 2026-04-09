@@ -1,0 +1,20 @@
+node_modules/
+dist/
+.parcel-cache/
+.env
+*.apk
+*.aab
+*.pem
+*.key
+*.cert
+
+# Unity (if migrating later)
+Library/
+Temp/
+Logs/
+obj/
+Build/
+
+# OS
+.DS_Store
+Thumbs.db
