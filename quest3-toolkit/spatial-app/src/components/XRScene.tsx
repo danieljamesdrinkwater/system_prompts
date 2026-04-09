@@ -1,8 +1,10 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useCallback } from "react";
 import { useFrame } from "@react-three/fiber";
 import { SpatialPanel } from "./SpatialPanel";
 import { HandMenu } from "./HandMenu";
 import { SpatialToolbar } from "./SpatialToolbar";
+import { Environment, type EnvironmentMode } from "./Environment";
+import { useEyeTracking } from "../hooks/useEyeTracking";
 import type { Group } from "three";
 
 /**
@@ -11,6 +13,7 @@ import type { Group } from "three";
  */
 export function XRScene() {
   const sceneRef = useRef<Group>(null);
+  const { gazeTarget } = useEyeTracking();
   const [panels, setPanels] = useState([
     { id: "welcome", type: "note" as const, position: [0, 1.5, -1.2] as [number, number, number] },
     { id: "timer-1", type: "timer" as const, position: [0.7, 1.5, -1.0] as [number, number, number] },
@@ -46,6 +49,7 @@ export function XRScene() {
           id={panel.id}
           type={panel.type}
           initialPosition={panel.position}
+          gazeTarget={gazeTarget}
           onClose={() => handleClosePanel(panel.id)}
         />
       ))}

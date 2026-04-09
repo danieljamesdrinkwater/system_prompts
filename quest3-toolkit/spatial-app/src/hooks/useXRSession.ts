@@ -48,6 +48,7 @@ export function useXRSession() {
           "hit-test",
           "depth-sensing",
           "anchors",
+          "eye-tracking",
         ],
       });
 

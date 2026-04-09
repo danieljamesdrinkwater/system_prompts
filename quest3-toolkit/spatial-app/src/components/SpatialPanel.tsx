@@ -1,15 +1,25 @@
-import { useRef, useState } from "react";
-import { useFrame } from "@react-three/fiber";
+import { useRef, useState, useEffect } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
 import { animated, useSpring } from "@react-spring/three";
 import { NoteBoard } from "./NoteBoard";
 import { TextEditor } from "./TextEditor";
 import { Timer } from "./Timer";
+import { VolumetricPanel } from "./VolumetricPanel";
+import {
+  registerGazeTarget,
+  unregisterGazeTarget,
+} from "../hooks/useEyeTracking";
+import { playSound } from "../hooks/useSpatialAudio";
+import { lerp } from "../utils/spatial-math";
 import type { Group, Mesh } from "three";
+import { Vector3 } from "three";
 
 interface SpatialPanelProps {
   id: string;
-  type: "note" | "editor" | "timer";
+  type: "note" | "editor" | "timer" | "volumetric";
   initialPosition: [number, number, number];
+  /** The panel ID currently being gazed at (from useEyeTracking) */
+  gazeTarget?: string | null;
   onClose: () => void;
 }
 
@@ -27,14 +37,41 @@ const BAR_HEIGHT = 0.04;
  * - Close button ornament on hover
  * - Spring animations for open/close
  * - Draggable in 3D space
+ * - Eye gaze interaction — border glow increases when gazed at
+ * - Adaptive opacity — panels dim based on distance from camera
  */
-export function SpatialPanel({ id, type, initialPosition, onClose }: SpatialPanelProps) {
+export function SpatialPanel({ id, type, initialPosition, gazeTarget, onClose }: SpatialPanelProps) {
   const groupRef = useRef<Group>(null);
   const panelRef = useRef<Mesh>(null);
   const [hovered, setHovered] = useState(false);
   const [dragging, setDragging] = useState(false);
   const [position, setPosition] = useState(initialPosition);
   const [closeHovered, setCloseHovered] = useState(false);
+
+  /** Whether this panel is currently being gazed at */
+  const isGazed = gazeTarget === id;
+
+  /** Distance-based opacity — smoothly interpolated each frame via lerp */
+  const distanceOpacity = useRef(1.0);
+
+  /** Reusable vector to avoid allocations in useFrame */
+  const worldPosVec = useRef(new Vector3());
+
+  const { camera } = useThree();
+
+  // Play open sound when panel mounts
+  useEffect(() => {
+    playSound("panelOpen", initialPosition);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Register/unregister the panel mesh for gaze raycasting
+  useEffect(() => {
+    const mesh = panelRef.current;
+    if (mesh) {
+      registerGazeTarget(mesh.uuid, id);
+      return () => unregisterGazeTarget(mesh.uuid);
+    }
+  }, [id]);
 
   // Spring animation for panel appearance
   const { scale, opacity } = useSpring({
@@ -50,15 +87,36 @@ export function SpatialPanel({ id, type, initialPosition, onClose }: SpatialPane
     config: { mass: 0.5, tension: 300, friction: 15 },
   });
 
-  // Hover glow intensity
+  // Hover glow intensity — boosted when gazed at (0.08 baseline -> 0.2 on gaze)
   const { glowIntensity } = useSpring({
-    glowIntensity: hovered ? 0.15 : 0.05,
+    glowIntensity: isGazed ? 0.2 : hovered ? 0.15 : 0.08,
     config: { tension: 200, friction: 20 },
   });
 
   useFrame(() => {
     if (groupRef.current) {
       groupRef.current.position.set(...position);
+
+      // --- Adaptive opacity based on distance from camera ---
+      groupRef.current.getWorldPosition(worldPosVec.current);
+      const dist = camera.position.distanceTo(worldPosVec.current);
+
+      // Determine target opacity based on distance thresholds
+      let targetOpacity: number;
+      if (dist <= 0.5) {
+        // Within arm's reach — full clarity
+        targetOpacity = 1.0;
+      } else if (dist <= 1.5) {
+        // Mid range — slight fade (linear 1.0 -> 0.85)
+        const t = (dist - 0.5) / 1.0;
+        targetOpacity = 1.0 - t * 0.15;
+      } else {
+        // Far panels — dimmed to reduce visual clutter
+        targetOpacity = 0.6;
+      }
+
+      // Smooth lerp towards target (0.08 factor for gentle ~12-frame transition)
+      distanceOpacity.current = lerp(distanceOpacity.current, targetOpacity, 0.08);
     }
   });
 
@@ -80,6 +138,7 @@ export function SpatialPanel({ id, type, initialPosition, onClose }: SpatialPane
 
   const handleClose = (e: { stopPropagation: () => void }) => {
     e.stopPropagation();
+    playSound("panelClose", position);
     onClose();
   };
 
@@ -91,6 +150,8 @@ export function SpatialPanel({ id, type, initialPosition, onClose }: SpatialPane
         return <TextEditor width={PANEL_WIDTH - 0.04} height={PANEL_HEIGHT - BAR_HEIGHT - 0.04} />;
       case "timer":
         return <Timer width={PANEL_WIDTH - 0.04} height={PANEL_HEIGHT - BAR_HEIGHT - 0.04} />;
+      case "volumetric":
+        return <VolumetricPanel width={PANEL_WIDTH - 0.04} height={PANEL_HEIGHT - BAR_HEIGHT - 0.04} />;
     }
   };
 
@@ -98,7 +159,10 @@ export function SpatialPanel({ id, type, initialPosition, onClose }: SpatialPane
     <animated.group
       ref={groupRef}
       scale={scale}
-      onPointerOver={() => setHovered(true)}
+      onPointerOver={() => {
+        setHovered(true);
+        playSound("hoverEnter", position);
+      }}
       onPointerOut={() => {
         setHovered(false);
         setDragging(false);
@@ -106,12 +170,12 @@ export function SpatialPanel({ id, type, initialPosition, onClose }: SpatialPane
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
     >
-      {/* Glass panel background */}
+      {/* Glass panel background — opacity modulated by distance */}
       <mesh ref={panelRef}>
         <planeGeometry args={[PANEL_WIDTH, PANEL_HEIGHT]} />
         <animated.meshPhysicalMaterial
           transparent
-          opacity={opacity}
+          opacity={opacity.to((o) => o * distanceOpacity.current)}
           color="#1a1a2e"
           metalness={0.1}
           roughness={0.3}
@@ -123,7 +187,7 @@ export function SpatialPanel({ id, type, initialPosition, onClose }: SpatialPane
         />
       </mesh>
 
-      {/* Glass border glow */}
+      {/* Glass border glow — enhanced on eye gaze */}
       <mesh position={[0, 0, -0.001]}>
         <planeGeometry args={[PANEL_WIDTH + 0.004, PANEL_HEIGHT + 0.004]} />
         <animated.meshBasicMaterial
@@ -141,7 +205,7 @@ export function SpatialPanel({ id, type, initialPosition, onClose }: SpatialPane
         <planeGeometry args={[PANEL_WIDTH, BAR_HEIGHT]} />
         <meshPhysicalMaterial
           transparent
-          opacity={0.3}
+          opacity={0.3 * distanceOpacity.current}
           color="#ffffff"
           metalness={0}
           roughness={0.5}
@@ -152,7 +216,7 @@ export function SpatialPanel({ id, type, initialPosition, onClose }: SpatialPane
       {[-0.02, 0, 0.02].map((x, i) => (
         <mesh key={i} position={[x, -(PANEL_HEIGHT / 2) + BAR_HEIGHT / 2, 0.002]}>
           <circleGeometry args={[0.003, 16]} />
-          <meshBasicMaterial color="#999999" transparent opacity={0.6} />
+          <meshBasicMaterial color="#999999" transparent opacity={0.6 * distanceOpacity.current} />
         </mesh>
       ))}
 
