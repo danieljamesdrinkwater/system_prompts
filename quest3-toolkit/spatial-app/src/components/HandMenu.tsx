@@ -2,9 +2,10 @@ import { useState } from "react";
 import { Text } from "@react-three/drei";
 import { animated, useSpring } from "@react-spring/three";
 import { playSound } from "../hooks/useSpatialAudio";
+import type { PanelType } from "./SpatialPanel";
 
 interface HandMenuProps {
-  onSpawn: (type: "note" | "editor" | "timer" | "volumetric") => void;
+  onSpawn: (type: PanelType) => void;
 }
 
 const MENU_ITEMS = [
