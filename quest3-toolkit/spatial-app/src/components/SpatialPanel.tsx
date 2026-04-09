@@ -6,6 +6,7 @@ import { NoteBoard } from "./NoteBoard";
 import { TextEditor } from "./TextEditor";
 import { Timer } from "./Timer";
 import { VolumetricPanel } from "./VolumetricPanel";
+import { SpatialKeyboard } from "./SpatialKeyboard";
 import {
   registerGazeTarget,
   unregisterGazeTarget,
@@ -225,11 +226,11 @@ export function SpatialPanel({ id, type, initialPosition, gazeTarget, onClose }:
       scale={scale.to((s) => s * panel.scale[0])}
       onPointerOver={() => {
         setHovered(true);
-        playSound("hoverEnter", position);
+        playSound("hoverEnter", panel.position);
       }}
       onPointerOut={() => {
         setHovered(false);
-        setDragging(false);
+        if (panel.isDragging) panel.endDrag();
       }}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
@@ -311,10 +312,20 @@ export function SpatialPanel({ id, type, initialPosition, gazeTarget, onClose }:
         </mesh>
       </animated.group>
 
-      {/* Panel content */}
-      <group position={[0, BAR_HEIGHT / 2, 0.002]}>
+      {/* Panel content — click to open keyboard on editor panels */}
+      <group position={[0, BAR_HEIGHT / 2, 0.002]} onClick={handleEditorClick}>
         {renderContent()}
       </group>
+
+      {/* Spatial keyboard — appears below editor panels when activated */}
+      {type === "editor" && (
+        <SpatialKeyboard
+          position={[0, -(PANEL_HEIGHT / 2) - 0.15, 0.02]}
+          visible={keyboardVisible}
+          onType={handleKeyboardType}
+          onDismiss={handleKeyboardDismiss}
+        />
+      )}
     </animated.group>
   );
 }

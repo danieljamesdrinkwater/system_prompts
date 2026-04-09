@@ -1,7 +1,6 @@
 import { useRef, useState, useMemo, useCallback, useEffect } from "react";
-import { useFrame } from "@react-three/fiber";
 import { animated, useSpring } from "@react-spring/three";
-import type { Group, Mesh, CanvasTexture as ThreeCanvasTexture } from "three";
+import type { Group, Mesh } from "three";
 import { CanvasTexture } from "three";
 
 // ─────────────────────────────────────────────
