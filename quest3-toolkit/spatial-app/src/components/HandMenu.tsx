@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { Text } from "@react-three/drei";
 import { animated, useSpring } from "@react-spring/three";
+import { playSound } from "../hooks/useSpatialAudio";
 
 interface HandMenuProps {
-  onSpawn: (type: "note" | "editor" | "timer") => void;
+  onSpawn: (type: "note" | "editor" | "timer" | "volumetric") => void;
 }
 
 const MENU_ITEMS = [
   { type: "note" as const, label: "Notes", icon: "N", color: "#FFE066" },
   { type: "editor" as const, label: "Editor", icon: "E", color: "#A3D9FF" },
   { type: "timer" as const, label: "Timer", icon: "T", color: "#BAFFC9" },
+  { type: "volumetric" as const, label: "3D Chart", icon: "V", color: "#C9A3FF" },
 ];
 
 /**
@@ -73,6 +75,7 @@ export function HandMenu({ onSpawn }: HandMenuProps) {
             scale={menuScale}
             onClick={(e: { stopPropagation: () => void }) => {
               e.stopPropagation();
+              playSound("selectionConfirm", [x, y, 0]);
               onSpawn(item.type);
               setOpen(false);
             }}

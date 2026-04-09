@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Text } from "@react-three/drei";
+import { playSound } from "../hooks/useSpatialAudio";
 
 interface SpatialToolbarProps {
   onSpawn: (type: "note" | "editor" | "timer") => void;
@@ -80,6 +81,7 @@ function ToolbarButton({
       onPointerOut={() => setHovered(false)}
       onClick={(e) => {
         e.stopPropagation();
+        playSound("selectionConfirm", position);
         onClick();
       }}
     >
