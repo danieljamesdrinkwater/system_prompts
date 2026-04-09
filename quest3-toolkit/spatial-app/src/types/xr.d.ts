@@ -47,3 +47,57 @@ interface XRFrame {
 interface XRJointPose extends XRPose {
   readonly radius: number;
 }
+
+// ---------------------------------------------------------------------------
+// WebXR Anchors Module
+// ---------------------------------------------------------------------------
+
+interface XRAnchor {
+  readonly anchorSpace: XRSpace;
+  readonly uuid?: string;
+  delete(): void;
+}
+
+interface XRFrame {
+  createAnchor?(
+    pose: XRRigidTransform,
+    space: XRSpace,
+  ): Promise<XRAnchor>;
+  trackedAnchors?: ReadonlySet<XRAnchor>;
+}
+
+interface XRSession {
+  restorePersistentAnchor?(uuid: string): Promise<XRAnchor>;
+  deletePersistentAnchor?(uuid: string): Promise<void>;
+  readonly persistentAnchors?: readonly string[];
+}
+
+// ---------------------------------------------------------------------------
+// WebXR Hit-Test Module
+// ---------------------------------------------------------------------------
+
+interface XRHitTestSource {
+  cancel(): void;
+}
+
+interface XRHitTestResult {
+  getPose(baseSpace: XRSpace): XRPose | null;
+}
+
+interface XRFrame {
+  getHitTestResults?(hitTestSource: XRHitTestSource): XRHitTestResult[];
+}
+
+interface XRSession {
+  requestHitTestSource?(options: {
+    space: XRReferenceSpace;
+    offsetRay?: XRRay;
+  }): Promise<XRHitTestSource>;
+}
+
+declare class XRRay {
+  constructor(origin?: DOMPointInit, direction?: DOMPointInit);
+  readonly origin: DOMPointReadOnly;
+  readonly direction: DOMPointReadOnly;
+  readonly matrix: Float32Array;
+}
