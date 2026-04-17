@@ -1,0 +1,72 @@
+#!/data/data/com.termux/files/usr/bin/bash
+# =============================================================================
+# Quest 3 Termux .bashrc
+# Optimized shell configuration for development on Meta Quest 3
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# PATH additions
+# ---------------------------------------------------------------------------
+export PATH="$HOME/.npm-global/bin:$HOME/.local/bin:$PATH"
+
+# ---------------------------------------------------------------------------
+# Environment
+# ---------------------------------------------------------------------------
+export EDITOR=nano
+
+# ---------------------------------------------------------------------------
+# Navigation aliases
+# ---------------------------------------------------------------------------
+alias ll='ls -la'
+alias la='ls -A'
+alias ..='cd ..'
+alias ...='cd ../..'
+
+# ---------------------------------------------------------------------------
+# Git aliases
+# ---------------------------------------------------------------------------
+alias gs='git status'
+alias gl='git log --oneline -20'
+alias gd='git diff'
+
+# ---------------------------------------------------------------------------
+# Git branch helper for prompt
+# ---------------------------------------------------------------------------
+__git_branch() {
+    local branch
+    branch=$(git symbolic-ref --short HEAD 2>/dev/null)
+    if [ -n "$branch" ]; then
+        echo " ($branch)"
+    fi
+}
+
+# ---------------------------------------------------------------------------
+# Quest-themed PS1 prompt
+# Format: [Q3] user:~/directory (branch)$
+# ---------------------------------------------------------------------------
+export PS1='\[\e[1;35m\][Q3]\[\e[0m\] \[\e[1;32m\]\u\[\e[0m\]:\[\e[1;34m\]\w\[\e[0;33m\]$(__git_branch)\[\e[0m\]\$ '
+
+# ---------------------------------------------------------------------------
+# Welcome message with device info
+# ---------------------------------------------------------------------------
+quest3_welcome() {
+    echo ""
+    echo "  =========================================="
+    echo "    Quest 3 Termux Development Environment"
+    echo "  =========================================="
+    echo ""
+    echo "  Device  : $(getprop ro.product.model 2>/dev/null || echo 'Quest 3')"
+    echo "  Android : $(getprop ro.build.version.release 2>/dev/null || echo 'N/A')"
+    echo "  Kernel  : $(uname -r 2>/dev/null || echo 'N/A')"
+    echo "  Arch    : $(uname -m 2>/dev/null || echo 'N/A')"
+    echo "  Shell   : $BASH_VERSION"
+    echo "  Node    : $(node --version 2>/dev/null || echo 'not installed')"
+    echo "  npm     : $(npm --version 2>/dev/null || echo 'not installed')"
+    echo "  Git     : $(git --version 2>/dev/null || echo 'not installed')"
+    echo "  Storage : $(df -h "$HOME" 2>/dev/null | awk 'NR==2{print $4 " free of " $2}' || echo 'N/A')"
+    echo ""
+    echo "  Type 'll' to list files, 'gs' for git status."
+    echo ""
+}
+
+quest3_welcome
